@@ -1,0 +1,28 @@
+iq_autocode.node_url:
+  path: '/nc/{short_value}'
+  defaults:
+    _controller: '\Drupal\iq_autocode\Controller\CodeController::resolveNodeUrl'
+    _title: 'Node URL'
+  requirements:
+    _permission: 'access content'
+iq_autocode.user_url:
+  path: '/uc/{short_value}'
+  defaults:
+    _controller: '\Drupal\iq_autocode\Controller\CodeController::resolveUserUrl'
+    _title: 'Node URL'
+  requirements:
+    _permission: 'access content'
+iq_autocode.term_url:
+  path: '/tc/{short_value}'
+  defaults:
+    _controller: '\Drupal\iq_autocode\Controller\CodeController::resolveTermUrl'
+    _title: 'Node URL'
+  requirements:
+    _permission: 'access content'
+iq_autocode.download_node:
+  path: '/iq_autocode/nc/{short_value}'
+  defaults:
+    _controller: '\Drupal\iq_autocode\Controller\CodeController::downloadNodeImage'
+    _title: 'Node Code Download'
+  requirements:
+    _permission: 'access content'

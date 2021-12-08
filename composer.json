@@ -1,0 +1,12 @@
+{
+  "name": "iqual/iq_autocode",
+  "description": "",
+  "type": "drupal-custom-module",
+  "keywords": [
+    "Drupal"
+  ],
+  "license": "GPL-2.0+",
+  "require": {
+    "drupal/barcodes": "^2.0"
+  }
+}

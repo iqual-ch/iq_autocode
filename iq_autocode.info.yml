@@ -1,0 +1,8 @@
+name: Code field
+description: Uses drupal/barcode to provide a self referencing qr or barcode field.
+
+type: module
+core_version_requirement: ^8.8 || ^9
+
+dependencies:
+  - barcodes:barcodes

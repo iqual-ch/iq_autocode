@@ -1,0 +1,323 @@
+<?php
+
+/**
+ * @file
+ */
+
+use Drupal\Core\Url;
+use Drupal\Core\Field\BaseFieldDefinition;
+use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\node\NodeTypeInterface;
+use Drupal\node\Entity\NodeType;
+
+/**
+ *
+ */
+function iq_autocode_form_node_type_form_alter(array &$form, FormStateInterface $form_state) {
+  /** @var \Drupal\node\NodeTypeInterface $type */
+  $type = $form_state->getFormObject()->getEntity();
+
+  $form['iq_autocode'] = [
+    '#type' => 'details',
+    '#title' => t('Autocode'),
+    '#weight' => 35,
+    '#group' => 'additional_settings',
+  ];
+
+  $form['iq_autocode']['qr_code'] = [
+    '#type' => 'details',
+    '#title' => t('QR code'),
+    '#weight' => 0,
+    '#open' => TRUE,
+  ];
+  $form['iq_autocode']['qr_code']['iq_autocode_qr_enable'] = [
+    '#type' => 'checkbox',
+    '#title' => t('Enable autocode on this node type'),
+    '#default_value' => $type->getThirdPartySetting('iq_autocode', 'qr_enable', FALSE),
+
+  ];
+  $form['iq_autocode']['qr_code']['iq_autocode_qr_base_domain'] = [
+    '#type' => 'url',
+    '#title' => t('Base domain'),
+    '#description' => t('Set the domain to use for link generation. Defaults to active url on qr code view.'),
+    '#url' => $type->getThirdPartySetting('iq_autocode', 'qr_base_domain', ''),
+    '#states' => [
+      'visible' => [
+        ':input[name="iq_autocode_qr_enable"]' => ['checked' => TRUE],
+      ],
+    ],
+  ];
+  // $form['iq_autocode']['qr_code']['token_tree_domain'] = [
+  //   '#theme' => 'token_tree_link',
+  //   '#token_types' => ['domain'],
+  //   '#show_restricted' => TRUE,
+  //   '#states' => [
+  //     'visible' => [
+  //       ':input[name="iq_autocode_qr_enable"]' => ['checked' => TRUE],
+  //     ],
+  //   ],
+  // ];
+  $form['iq_autocode']['qr_code']['iq_autocode_qr_show'] = [
+    '#type' => 'checkbox',
+    '#title' => t('Show the qr code on edit form'),
+    '#description' => t('Show the qr code on edit form'),
+    '#default_value' => $type->getThirdPartySetting('iq_autocode', 'qr_show', TRUE),
+    '#states' => [
+      'visible' => [
+        ':input[name="iq_autocode_qr_enable"]' => ['checked' => TRUE],
+      ],
+    ],
+  ];
+  $form['iq_autocode']['qr_code']['iq_autocode_qr_show_url'] = [
+    '#type' => 'checkbox',
+    '#title' => t('Show url on edit form'),
+    '#description' => t('Show url on edit form'),
+    '#default_value' => $type->getThirdPartySetting('iq_autocode', 'qr_show_url', FALSE),
+    '#states' => [
+      'visible' => [
+        ':input[name="iq_autocode_qr_enable"]' => ['checked' => TRUE],
+      ],
+    ],
+  ];
+  $form['iq_autocode']['qr_code'] += _get_utm_fields('qr', $type);
+
+  $form['iq_autocode']['short_link'] = [
+    '#type' => 'details',
+    '#title' => t('Short url'),
+    '#weight' => 0,
+    '#open' => TRUE,
+  ];
+  $form['iq_autocode']['short_link']['iq_autocode_short_enable'] = [
+    '#type' => 'checkbox',
+    '#title' => t('Enable short url on this node type'),
+    '#default_value' => $type->getThirdPartySetting('iq_autocode', 'short_enable', FALSE),
+  ];
+  $form['iq_autocode']['short_link']['iq_autocode_short_base_domain'] = [
+    '#type' => 'url',
+    '#title' => t('Set base domain'),
+    '#description' => t('Set the domain to use for link generation. Defaults to active url on short link view.'),
+    '#url' => $type->getThirdPartySetting('iq_autocode', 'short_base_domain', ''),
+    '#states' => [
+      'visible' => [
+        ':input[name="iq_autocode_short_enable"]' => ['checked' => TRUE],
+      ],
+    ],
+  ];
+  // $form['iq_autocode']['short_link']['token_tree_domain'] = [
+  //   '#theme' => 'token_tree_link',
+  //   '#token_types' => ['domain'],
+  //   '#show_restricted' => TRUE,
+  //   '#states' => [
+  //     'visible' => [
+  //       ':input[name="iq_autocode_short_enable"]' => ['checked' => TRUE],
+  //     ],
+  //   ],
+  // ];
+  $form['iq_autocode']['short_link']['iq_autocode_short_show_url'] = [
+    '#type' => 'checkbox',
+    '#title' => t('Show url on edit form'),
+    '#description' => t('Show url on edit form'),
+    '#default_value' => $type->getThirdPartySetting('iq_autocode', 'short_show_url', TRUE),
+    '#states' => [
+      'visible' => [
+        ':input[name="iq_autocode_short_enable"]' => ['checked' => TRUE],
+      ],
+    ],
+  ];
+  $form['iq_autocode']['short_link'] += _get_utm_fields('short', $type);
+
+  $form['#entity_builders'][] = '_iq_autocode_form_node_type_form_builder';
+}
+
+/**
+ *
+ */
+function _get_utm_fields($target, NodeTypeInterface $type) {
+  $fields = [];
+
+  $fields['utm_params'] = [
+    '#type' => 'details',
+    '#title' => t('UTM parameters'),
+    '#open' => TRUE,
+    '#states' => [
+      'visible' => [
+        ':input[name="iq_autocode_' . $target . '_enable"]' => ['checked' => TRUE],
+      ],
+    ],
+  ];
+  $fields['utm_params']['iq_autocode_' . $target . '_utm_source'] = [
+    '#type' => 'textfield',
+    '#title' => t('Set UTM source for link'),
+    '#description' => t('Set UTM source for link.'),
+    '#url' => $type->getThirdPartySetting('iq_autocode', $target . '_utm_source', ''),
+
+  ];
+
+  $fields['utm_params']['iq_autocode_' . $target . '_utm_medium'] = [
+    '#type' => 'textfield',
+    '#title' => t('Set UTM medium for link'),
+    '#description' => t('Set UTM medium for link.'),
+    '#url' => $type->getThirdPartySetting('iq_autocode', $target . '_utm_medium', ''),
+
+  ];
+  $fields['utm_params']['iq_autocode_' . $target . '_utm_campaign'] = [
+    '#type' => 'textfield',
+    '#title' => t('Set UTM campaign for link'),
+    '#description' => t('Set UTM campaign for link.'),
+    '#url' => $type->getThirdPartySetting('iq_autocode', $target . '_utm_campaign', ''),
+  ];
+  $fields['utm_params']['iq_autocode_' . $target . '_utm_content'] = [
+    '#type' => 'textfield',
+    '#title' => t('Set UTM content for link'),
+    '#description' => t('Set UTM content for link.'),
+    '#url' => $type->getThirdPartySetting('iq_autocode', $target . '_utm_content', ''),
+
+  ];
+  $fields['utm_params']['iq_autocode_' . $target . '_utm_term'] = [
+    '#type' => 'textfield',
+    '#title' => t('Set UTM term for link'),
+    '#description' => t('Set UTM term for link.'),
+    '#url' => $type->getThirdPartySetting('iq_autocode', $target . '_utm_term', ''),
+  ];
+  $fields['utm_params']['token_tree'] = [
+    '#theme' => 'token_tree_link',
+    '#token_types' => [str_replace('_type', '', $type->getEntityTypeId())],
+    '#show_restricted' => TRUE,
+  ];
+  return $fields;
+}
+
+/**
+ *
+ */
+function _iq_autocode_form_node_type_form_builder($entity_type, NodeTypeInterface $type, &$form, FormStateInterface $form_state) {
+  // QR code.
+  $type->setThirdPartySetting('iq_autocode', 'qr_enable', $form_state->getValue('iq_autocode_qr_enable'));
+  $type->setThirdPartySetting('iq_autocode', 'qr_base_domain', $form_state->getValue('iq_autocode_qr_base_domain'));
+  $type->setThirdPartySetting('iq_autocode', 'qr_show', $form_state->getValue('iq_autocode_qr_show'));
+  $type->setThirdPartySetting('iq_autocode', 'qr_show_url', $form_state->getValue('iq_autocode_qr_show_url'));
+
+  // Short url.
+  $type->setThirdPartySetting('iq_autocode', 'short_enable', $form_state->getValue('iq_autocode_short_enable'));
+  $type->setThirdPartySetting('iq_autocode', 'short_base_domain', $form_state->getValue('iq_autocode_short_base_domain'));
+  $type->setThirdPartySetting('iq_autocode', 'short_show_url', $form_state->getValue('iq_autocode_short_show_url'));
+}
+
+/**
+ *
+ */
+function _save_utm_parameters($target, NodeTypeInterface $type, FormStateInterface $form_state) {
+  $type->setThirdPartySetting('iq_autocode', $target . '_utm_source', $form_state->getValue('iq_autocode_ ' . $target . 'utm_source'));
+  $type->setThirdPartySetting('iq_autocode', $target . '_utm_medium', $form_state->getValue('iq_autocode_ ' . $target . 'utm_medium'));
+  $type->setThirdPartySetting('iq_autocode', $target . '_utm_campaign', $form_state->getValue('iq_autocode_ ' . $target . 'utm_campaign'));
+  $type->setThirdPartySetting('iq_autocode', $target . '_utm_content', $form_state->getValue('iq_autocode_ ' . $target . 'utm_content'));
+  $type->setThirdPartySetting('iq_autocode', $target . '_utm_term', $form_state->getValue('iq_autocode_ ' . $target . 'utm_term'));
+
+}
+
+/**
+ * Implements hook_entity_base_field_info().
+ */
+function iq_autocode_entity_bundle_field_info(EntityTypeInterface $entity_type, $bundle, array $base_field_definitions) {
+  if (in_array($entity_type->id(), ['node'])) {
+    $type = NodeType::load($bundle);
+    if ($type->getThirdPartySetting('iq_autocode', 'qr_enable')) {
+
+      // Add the autocode field.
+      $fields['iq_autocode'] = BaseFieldDefinition::create('iq_autocode')
+        ->setName('iq_autocode')
+        ->setLabel(t('Autocode field'))
+        ->setComputed(TRUE)
+        ->setClass('\Drupal\iq_autocode\AutoCodeLinkList')
+        ->setCardinality(1)
+        ->setDisplayConfigurable('view', TRUE)
+        ->setDisplayOptions('view', [
+          'label' => 'hidden',
+          'weight' => -5,
+          'type' => 'iq_autocode',
+        ]);
+    }
+    if ($type->getThirdPartySetting('iq_autocode', 'short_enable')) {
+      // Add the autocode field.
+      $fields['iq_autocode_short_link'] = BaseFieldDefinition::create('iq_autocode_shortlink')
+        ->setName('iq_autocode_short_link')
+        ->setLabel(t('Short link'))
+        ->setComputed(TRUE)
+        ->setClass('\Drupal\iq_autocode\AutoCodeLinkList')
+        ->setCardinality(1)
+        ->setDisplayConfigurable('view', TRUE)
+        ->setDisplayOptions('view', [
+          'label' => 'hidden',
+          'weight' => -5,
+          'type' => 'iq_autocode_shortlink',
+        ]);
+      return $fields;
+    }
+  }
+}
+
+/**
+ *
+ */
+function iq_autocode_form_node_form_alter(&$form, &$form_state, $form_id) {
+  $node = $form_state->getFormObject()->getEntity();
+  $settings = $node->type->entity->getThirdPartySettings('iq_autocode');
+  if (!empty($settings['qr_enable']) && $settings['qr_enable']) {
+    $form['meta']['iq_autocode_qr_container'] = [
+      '#type' => 'fieldset',
+      '#title' => t('QR Code'),
+      '#weight' => 100,
+    ];
+    if ($settings['qr_show']) {
+      $form['meta']['iq_autocode_qr_container']['iq_autocode'] = $node->iq_autocode->view([
+        'type' => 'iq_autocode',
+        'label' => '',
+        'settings' => [
+          'height' => 400,
+          'width' => 400,
+        ],
+      ]);
+
+      $form['meta']['iq_autocode_qr_container']['iq_autocode']['#prefix'] = '<a href="/iq_autocode/nc/' . base_convert($node->id(), 10, 36) . '" target="_blank">';
+      $form['meta']['iq_autocode_qr_container']['iq_autocode']['#suffix'] = '</a>';
+    }
+    if ($settings['qr_show_url']) {
+      $url = Url::fromUri($node->iq_autocode->uri);
+      $form['meta']['iq_autocode_qr_container']['iq_autocode_url'] = [
+        '#type' => 'link',
+        '#url' => $url,
+        '#title' => $url->toString(),
+      ];
+    }
+  }
+  if (!empty($settings['short_enable']) && $settings['short_enable']) {
+    if ($settings['short_show_url']) {
+      $url = Url::fromUri($node->iq_autocode_short_link->uri);
+      $form['meta']['iq_autocode_short_link_container'] = [
+        '#type' => 'fieldset',
+        '#title' => t('Short URL'),
+        '#weight' => 201,
+      ];
+      $form['meta']['iq_autocode_short_link_container']['iq_autocode_short_link'] = [
+        '#type' => 'link',
+        '#url' => $url,
+        '#title' => $url->toString(),
+      ];
+    }
+  }
+}
+
+/**
+ * Implements hook_field_formatter_info_alter().
+ */
+function iq_autocode_field_formatter_info_alter(array &$info) {
+  $info['link']['field_types'][] = 'iq_autocode_shortlink';
+}
+
+/**
+ * Implements hook_field_widget_info_alter().
+ */
+function iq_autocode_field_widget_info_alter(array &$info) {
+  $info['link_default']['field_types'][] = 'iq_autocode_shortlink';
+}
