@@ -2,6 +2,7 @@
 
 namespace Drupal\iq_autocode\Plugin\Field\FieldType;
 
+use Drupal\taxonomy\Entity\Vocabulary;
 use Drupal\link\Plugin\Field\FieldType\LinkItem;
 
 /**
@@ -56,9 +57,18 @@ class AutoCodeLinkItem extends LinkItem {
     if (!$this->isCalculated) {
       $entity = $this->getEntity();
       if (!$entity->isNew()) {
+        if ($entity->getEntityTypeId() == 'node') {
+          $host = $entity->type->entity->getThirdPartySetting('iq_autocode', 'qr_base_domain', \Drupal::request()->getSchemeAndHttpHost());
+          $prefix = 'nc';
+        }
+        if ($entity->getEntityTypeId() == 'taxonomy_term') {
+          $host = Vocabulary::load($entity->bundle())->getThirdPartySetting('iq_autocode', 'qr_base_domain', \Drupal::request()->getSchemeAndHttpHost());
+          $prefix = 'tc';
+        }
+
         $value = [
-          'uri' => 'https://www.example.com/nc/' . base_convert($entity->id(), 10, 36),
-          'title' => t('Self short link'),
+          'uri' => $host . '/' . $prefix . '/' . base_convert($entity->id(), 10, 36),
+          'title' => t('Self qr link'),
         ];
         $this->setValue($value);
         $this->isCalculated = TRUE;

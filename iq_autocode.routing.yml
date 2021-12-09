@@ -1,28 +1,64 @@
-iq_autocode.node_url:
-  path: '/nc/{short_value}'
+iq_autocode.node_url_qr:
+  path: "/nc/{short_value}"
   defaults:
-    _controller: '\Drupal\iq_autocode\Controller\CodeController::resolveNodeUrl'
-    _title: 'Node URL'
+    _controller: '\Drupal\iq_autocode\Controller\CodeController::resolveNodeUrlQr'
+    _title: "Node URL"
   requirements:
-    _permission: 'access content'
-iq_autocode.user_url:
-  path: '/uc/{short_value}'
+    _permission: "access content"
+iq_autocode.user_url_qr:
+  path: "/uc/{short_value}"
   defaults:
-    _controller: '\Drupal\iq_autocode\Controller\CodeController::resolveUserUrl'
-    _title: 'Node URL'
+    _controller: '\Drupal\iq_autocode\Controller\CodeController::resolveUserUrlQr'
+    _title: "Node URL"
   requirements:
-    _permission: 'access content'
-iq_autocode.term_url:
-  path: '/tc/{short_value}'
+    _permission: "access content"
+iq_autocode.term_url_qr:
+  path: "/tc/{short_value}"
   defaults:
-    _controller: '\Drupal\iq_autocode\Controller\CodeController::resolveTermUrl'
-    _title: 'Node URL'
+    _controller: '\Drupal\iq_autocode\Controller\CodeController::resolveTermUrlQr'
+    _title: "Node URL"
   requirements:
-    _permission: 'access content'
-iq_autocode.download_node:
-  path: '/iq_autocode/nc/{short_value}'
+    _permission: "access content"
+iq_autocode.download_node_qr:
+  path: "/iq_autocode/nc/{short_value}"
   defaults:
-    _controller: '\Drupal\iq_autocode\Controller\CodeController::downloadNodeImage'
-    _title: 'Node Code Download'
+    _controller: '\Drupal\iq_autocode\Controller\CodeController::downloadNodeQr'
+    _title: "Node Code Download"
   requirements:
-    _permission: 'access content'
+    _permission: "access content"
+iq_autocode.download_user_qr:
+  path: "/iq_autocode/uc/{short_value}"
+  defaults:
+    _controller: '\Drupal\iq_autocode\Controller\CodeController::downloadUserQr'
+    _title: "Node Code Download"
+  requirements:
+    _permission: "access content"
+iq_autocode.download_term_qr:
+  path: "/iq_autocode/tc/{short_value}"
+  defaults:
+    _controller: '\Drupal\iq_autocode\Controller\CodeController::downloadTermQr'
+    _title: "Node Code Download"
+  requirements:
+    _permission: "access content"
+
+iq_autocode.node_url_short:
+  path: "/ns/{short_value}"
+  defaults:
+    _controller: '\Drupal\iq_autocode\Controller\CodeController::resolveNodeUrlShort'
+    _title: "Node URL"
+  requirements:
+    _permission: "access content"
+iq_autocode.user_url_short:
+  path: "/us/{short_value}"
+  defaults:
+    _controller: '\Drupal\iq_autocode\Controller\CodeController::resolveUserUrlShort'
+    _title: "Node URL"
+  requirements:
+    _permission: "access content"
+iq_autocode.term_url_short:
+  path: "/ts/{short_value}"
+  defaults:
+    _controller: '\Drupal\iq_autocode\Controller\CodeController::resolveTermUrlShort'
+    _title: "Node URL"
+  requirements:
+    _permission: "access content"
