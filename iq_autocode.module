@@ -118,6 +118,28 @@ function iq_autocode_field_widget_info_alter(array &$info) {
 }
 
 /**
+ * Implements hook_views_data_alter().
+ */
+function iq_autocode_views_data_alter(array &$data) {
+  if (isset($data['node_field_data'])) {
+    $data['node_field_data']['iq_autocode'] = [
+      'title' => t('Qr code'),
+      'help' => t('Qr code to the node.'),
+      'field' => [
+        'id' => 'iq_autocode',
+      ],
+    ];
+    $data['node_field_data']['iq_autocode_short_link'] = [
+      'title' => t('Short link'),
+      'help' => t('Short link to the node.'),
+      'field' => [
+        'id' => 'iq_autocode_short_link',
+      ],
+    ];
+  }
+}
+
+/**
  *
  */
 function _iq_autocode_build_form(ThirdPartySettingsInterface $type, array &$form, FormStateInterface $form_state) {
