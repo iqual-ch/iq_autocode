@@ -7,9 +7,11 @@ This modules adds autocomputed short url and qr code fields to nodes and terms.
 Install the module using composer:
 `composer require iqual/iq_autocode`
 
-The module requires drupal/barcodes and tecnickcom/tc-lib-barcode.
+Enable the module using drush:
+`drush en iq_autocode`
 
-For tecnickcom/tc-lib-barcode, the general packagist repo may be necessary.
+## Dependencies
+The module requires drupal/barcodes and tecnickcom/tc-lib-barcode. For tecnickcom/tc-lib-barcode, the general packagist repo may be necessary.
 
 ## Setup
 
