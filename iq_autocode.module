@@ -4,6 +4,7 @@
  * @file
  */
 
+use Drupal\Core\Render\BubbleableMetadata;
 use Drupal\taxonomy\Entity\Vocabulary;
 use Drupal\node\Entity\NodeType;
 use Drupal\Core\Config\Entity\ThirdPartySettingsInterface;
@@ -137,6 +138,84 @@ function iq_autocode_views_data_alter(array &$data) {
       ],
     ];
   }
+}
+
+/**
+ *
+ */
+function iq_autocode_token_info() {
+  $autocodeTokens = [
+    'iqac_short_link' =>
+    [
+      'name' => t('Autocode Short url'),
+      'description' => t('Short url of the entity.'),
+    ],
+    'iqac_qr_link' =>
+    [
+      'name' => t('Autocode QR code url'),
+      'description' => t('QR code url of the entity.'),
+    ],
+    'iqac_qr_download_link' =>
+    [
+      'name' => t('Autocode QR code download url'),
+      'description' => t('QR code download url of the entity.'),
+    ],
+  ];
+  $info = [
+    'tokens' =>
+    [
+      'node' => $autocodeTokens,
+      'term' => $autocodeTokens,
+    ],
+  ];
+
+  return $info;
+}
+
+/**
+ * Implements hook_tokens()
+ */
+function iq_autocode_tokens($type, $tokens, array $data, array $options, BubbleableMetadata $bubbleable_metadata) {
+  $replacements = [];
+  if ($type == 'node' || $type == 'term') {
+    if ($type == 'term') {
+      $entity = $data['term'];
+      $entityType = Vocabulary::load($entity->bundle());
+      $prefix = 'tc';
+    }
+    else {
+      $entity = $data['node'];
+      $entityType = $entity->type->entity;
+      $prefix = 'nc';
+    }
+    foreach ($tokens as $name => $original) {
+      // Find the desired token by name.
+      switch ($name) {
+        case 'iqac_short_link':
+          if ($entityType->getThirdpartySetting('iq_autocode', 'short_enable', FALSE)) {
+            $replacements[$original] = $entity->iq_autocode_short_link->uri;
+          }
+          break;
+
+        case 'iqac_qr_link':
+          if ($entityType->getThirdpartySetting('iq_autocode', 'qr_enable', FALSE)) {
+            $replacements[$original] = $entity->iq_autocode->uri;
+          }
+          break;
+
+        case 'iqac_qr_download_link':
+          if ($entityType->getThirdpartySetting('iq_autocode', 'qr_enable', FALSE)) {
+            $host = $entityType->getThirdPartySetting('iq_autocode', 'qr_base_domain', \Drupal::request()->getSchemeAndHttpHost());
+            $url = $host . '/iq_autocode/' . $prefix . '/' . base_convert($entity->id(), 10, 36);
+            $replacements[$original] = $url;
+          }
+          break;
+      }
+    }
+  }
+
+  // Return the replacements.
+  return $replacements;
 }
 
 /**
