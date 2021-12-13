@@ -2,6 +2,8 @@
 
 namespace Drupal\iq_autocode\Controller;
 
+use Drupal\Core\Config\Entity\ThirdpartySettingsInterface;
+use Drupal\Core\Entity\EntityInterface;
 use Drupal\iq_autocode\UserThirdpartyWrapper;
 use Drupal\taxonomy\Entity\Vocabulary;
 use Drupal\taxonomy\Entity\Term;
@@ -13,12 +15,12 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- *
+ * Resolves requests to short urls.
  */
 class CodeController extends ControllerBase {
 
   /**
-   *
+   * The possible utm variables.
    */
   public const UTM_VARS = [
     'utm_source', 'utm_medium', 'utm_campagin', 'utm_content', 'utm_term',
@@ -30,28 +32,47 @@ class CodeController extends ControllerBase {
    * @param string $short_value
    *   The short value to resolve.
    *
-   * @return void
+   * @return \Symfony\Component\HttpFoundation\Response
+   *   The response.
    */
   public function resolveNodeUrlQr(string $short_value) {
     return $this->resolveNodeUrl($short_value, 'qr');
   }
 
   /**
+   * Resolves a short value to a user (or front page).
    *
+   * @param string $short_value
+   *   The short value to resolve.
+   *
+   * @return \Symfony\Component\HttpFoundation\Response
+   *   The response.
    */
   public function resolveUserUrlQr(string $short_value) {
     return $this->resolveUserUrl($short_value, 'qr');
   }
 
   /**
+   * Resolves a short value to a term (or front page).
    *
+   * @param string $short_value
+   *   The short value to resolve.
+   *
+   * @return \Symfony\Component\HttpFoundation\Response
+   *   The response.
    */
   public function resolveTermUrlQr(string $short_value) {
     return $this->resolveTermUrl($short_value, 'qr');
   }
 
   /**
+   * Returns a download response for the node qr code.
    *
+   * @param string $short_value
+   *   The short value to resolve.
+   *
+   * @return \Symfony\Component\HttpFoundation\Response
+   *   The response.
    */
   public function downloadNodeQr(string $short_value) {
     $id = intval($short_value, 36);
@@ -64,7 +85,13 @@ class CodeController extends ControllerBase {
   }
 
   /**
+   * Returns a download response for the user qr code.
    *
+   * @param string $short_value
+   *   The short value to resolve.
+   *
+   * @return \Symfony\Component\HttpFoundation\Response
+   *   The response.
    */
   public function downloadUserQr(string $short_value) {
     $id = intval($short_value, 36);
@@ -77,7 +104,13 @@ class CodeController extends ControllerBase {
   }
 
   /**
+   * Returns a download response for the term qr code.
    *
+   * @param string $short_value
+   *   The short value to resolve.
+   *
+   * @return \Symfony\Component\HttpFoundation\Response
+   *   The response.
    */
   public function downloadTermQr(string $short_value) {
     $id = intval($short_value, 36);
@@ -91,30 +124,54 @@ class CodeController extends ControllerBase {
   }
 
   /**
+   * Resolves a short value to a node (or front page).
    *
+   * @param string $short_value
+   *   The short value to resolve.
+   *
+   * @return \Symfony\Component\HttpFoundation\Response
+   *   The response.
    */
   public function resolveNodeUrlShort(string $short_value) {
     return $this->resolveNodeUrl($short_value, 'short');
   }
 
   /**
+   * Resolves a short value to a user (or front page).
    *
+   * @param string $short_value
+   *   The short value to resolve.
+   *
+   * @return \Symfony\Component\HttpFoundation\Response
+   *   The response.
    */
   public function resolveUserUrlShort(string $short_value) {
     return $this->resolveUserUrl($short_value, 'short');
   }
 
   /**
+   * Resolves a short value to a term (or front page).
    *
+   * @param string $short_value
+   *   The short value to resolve.
+   *
+   * @return \Symfony\Component\HttpFoundation\Response
+   *   The response.
    */
   public function resolveTermUrlShort(string $short_value) {
     return $this->resolveTermUrl($short_value, 'short');
   }
 
   /**
+   * Helper function to create the qr download response.
    *
+   * @param \Drupal\Core\Entity\EntityInterface $entity
+   *   The entity to create the qr code.
+   *
+   * @return \Symfony\Component\HttpFoundation\Response
+   *   The response.
    */
-  protected function sendQrCode($entity) {
+  protected function sendQrCode(EntityInterface $entity) {
     $svgCode = $entity->iq_autocode->view([
       'type' => 'iq_autocode',
       'label' => t('QR Code'),
@@ -133,7 +190,15 @@ class CodeController extends ControllerBase {
   }
 
   /**
+   * Helper to resolve a short url to the node and type (qr/short).
    *
+   * @param string $short_value
+   *   The short value to resolve.
+   * @param string $type
+   *   The type of link to resolve (qr or short).
+   *
+   * @return Symfony\Component\HttpFoundation\RedirectResponse
+   *   The redirect response to the node.
    */
   protected function resolveNodeUrl(string $short_value, string $type) {
     $url = Url::fromRoute('<front>', [], ['absolute' => TRUE])->toString();
@@ -149,7 +214,15 @@ class CodeController extends ControllerBase {
   }
 
   /**
+   * Helper to resolve a short url to the user and type (qr/short).
    *
+   * @param string $short_value
+   *   The short value to resolve.
+   * @param string $type
+   *   The type of link to resolve (qr or short).
+   *
+   * @return Symfony\Component\HttpFoundation\RedirectResponse
+   *   The redirect response to the user.
    */
   protected function resolveUserUrl(string $short_value, string $type) {
     $url = Url::fromRoute('<front>', [], ['absolute' => TRUE])->toString();
@@ -166,7 +239,15 @@ class CodeController extends ControllerBase {
   }
 
   /**
+   * Helper to resolve a short url to the term and type (qr/short).
    *
+   * @param string $short_value
+   *   The short value to resolve.
+   * @param string $type
+   *   The type of link to resolve (qr or short).
+   *
+   * @return Symfony\Component\HttpFoundation\RedirectResponse
+   *   The redirect response to the term.
    */
   protected function resolveTermUrl(string $short_value, string $type) {
     $url = Url::fromRoute('<front>', [], ['absolute' => TRUE])->toString();
@@ -182,9 +263,19 @@ class CodeController extends ControllerBase {
   }
 
   /**
+   * Helper function to create the url to the entity.
    *
+   * @param \Drupal\Core\Entity\EntityInterface $entity
+   *   The targeted entity.
+   * @param Drupal\Core\Config\Entity\ThirdpartySettingsInterface $settings
+   *   The settings for this entity.
+   * @param string $type
+   *   The tzpe of short url (qr or short).
+   *
+   * @return \Drupal\Core\Url
+   *   The Url to the entity or the front page.
    */
-  protected function createUrl($entity, $settings, $type) {
+  protected function createUrl(EntityInterface $entity, ThirdpartySettingsInterface $settings, string $type) {
     $tokenService = \Drupal::service('token');
     if (!empty($settings[$type . '_enable']) && $settings[$type . '_enable']) {
       $query = [];

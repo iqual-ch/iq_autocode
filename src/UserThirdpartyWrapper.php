@@ -2,14 +2,12 @@
 
 namespace Drupal\iq_autocode;
 
-/**
- *
- */
-
 use Drupal\Core\Config\Entity\ThirdpartySettingsInterface;
 
 /**
+ * Emulates ThirdpartySettingsInterface for the user type.
  *
+ * This simplifies the rest of the module code.
  */
 class UserThirdpartyWrapper implements ThirdpartySettingsInterface {
 
@@ -46,14 +44,14 @@ class UserThirdpartyWrapper implements ThirdpartySettingsInterface {
   ];
 
   /**
-   *
+   * Create a new UserThirdpartyWrapper.
    */
   public function __construct() {
     $this->config = \Drupal::service('config.factory')->getEditable('iq_autocode.settings');
   }
 
   /**
-   *
+   * On descruction, save the config.
    */
   public function __destruct() {
     $this->config->save();
@@ -100,7 +98,7 @@ class UserThirdpartyWrapper implements ThirdpartySettingsInterface {
   }
 
   /**
-   * {@inheritDoc}
+   * Returns the user entity type id "user".
    */
   public function getEntityTypeId() {
     return 'user';

@@ -35,7 +35,8 @@ class AutoCodeField extends FieldPluginBase {
       $entity = $values->_entity;
     }
 
-    if (in_array($entity->getEntityTypeId(), ['node', 'taxonomy_term', 'user'])) {
+    // If we have the right entity type, render the code field.
+    if (!empty($entity) && in_array($entity->getEntityTypeId(), ['node', 'taxonomy_term', 'user'])) {
       $value = $entity->iq_autocode->view([
         'type' => 'iq_autocode',
         'label' => '',

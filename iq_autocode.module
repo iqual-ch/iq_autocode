@@ -16,14 +16,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\iq_autocode\UserThirdpartyWrapper;
 
 /**
- *
- */
-function iq_autocode_form_alter(array &$form, FormStateInterface $form_state, $formId) {
-  echo $formId;
-}
-
-/**
- *
+ * Implements hook_form_node_type_form_alter().
  */
 function iq_autocode_form_node_type_form_alter(array &$form, FormStateInterface $form_state) {
   /** @var \Drupal\node\NodeTypeInterface $type */
@@ -32,7 +25,7 @@ function iq_autocode_form_node_type_form_alter(array &$form, FormStateInterface 
 }
 
 /**
- *
+ * Implements hook_form_user_admin_settings_alter().
  */
 function iq_autocode_form_user_admin_settings_alter(array &$form, FormStateInterface $form_state) {
   // _iq_autocode_build_form($type, $form, $form_state);
@@ -41,7 +34,7 @@ function iq_autocode_form_user_admin_settings_alter(array &$form, FormStateInter
 }
 
 /**
- *
+ * Implements hook_form_taxonomy_vocabulary_form_alter().
  */
 function iq_autocode_form_taxonomy_vocabulary_form_alter(array &$form, FormStateInterface $form_state) {
   /** @var \Drupal\taxonomy\VocabularyInterface $type */
@@ -99,7 +92,7 @@ function iq_autocode_entity_bundle_field_info(EntityTypeInterface $entity_type, 
 }
 
 /**
- *
+ * Implements hook_form_node_form_alter().
  */
 function iq_autocode_form_node_form_alter(&$form, &$form_state, $form_id) {
 
@@ -109,7 +102,7 @@ function iq_autocode_form_node_form_alter(&$form, &$form_state, $form_id) {
 }
 
 /**
- *
+ * Implements hook_form_user_form_alter().
  */
 function iq_autocode_form_user_form_alter(&$form, &$form_state, $form_id) {
 
@@ -119,7 +112,7 @@ function iq_autocode_form_user_form_alter(&$form, &$form_state, $form_id) {
 }
 
 /**
- *
+ * Implements hook_form_taxonomy_term_form_alter().
  */
 function iq_autocode_form_taxonomy_term_form_alter(&$form, &$form_state, $form_id) {
   $entity = $form_state->getFormObject()->getEntity();
@@ -164,7 +157,7 @@ function iq_autocode_views_data_alter(array &$data) {
 }
 
 /**
- *
+ * Implements hook_token_info().
  */
 function iq_autocode_token_info() {
   $autocodeTokens = [
@@ -197,7 +190,7 @@ function iq_autocode_token_info() {
 }
 
 /**
- * Implements hook_tokens()
+ * Implements hook_tokens().
  */
 function iq_autocode_tokens($type, $tokens, array $data, array $options, BubbleableMetadata $bubbleable_metadata) {
   $replacements = [];
@@ -252,7 +245,7 @@ function iq_autocode_tokens($type, $tokens, array $data, array $options, Bubblea
 }
 
 /**
- *
+ * Helper function to build the entity settings form.
  */
 function _iq_autocode_build_form(ThirdPartySettingsInterface $type, array &$form, FormStateInterface $form_state) {
 
@@ -379,7 +372,7 @@ function _iq_autocode_build_form(ThirdPartySettingsInterface $type, array &$form
 }
 
 /**
- *
+ * Helper to include the utm fields for the form.
  */
 function _iq_autocode_get_utm_fields($target, ThirdPartySettingsInterface $type) {
   $fields = [];
@@ -411,7 +404,7 @@ function _iq_autocode_get_utm_fields($target, ThirdPartySettingsInterface $type)
 }
 
 /**
- *
+ * Submit function for account settings form.
  */
 function _iq_autocode_form_submit(array $form, FormStateInterface $form_state) {
   $type = new UserThirdpartyWrapper();
@@ -419,7 +412,7 @@ function _iq_autocode_form_submit(array $form, FormStateInterface $form_state) {
 }
 
 /**
- *
+ * Submit function for node and term type form.
  */
 function _iq_autocode_form_type_form_builder($entity_type, ThirdPartySettingsInterface $type, &$form, FormStateInterface $form_state) {
   // QR code.
@@ -449,7 +442,7 @@ function _iq_autocode_form_type_form_builder($entity_type, ThirdPartySettingsInt
 }
 
 /**
- *
+ * Helper to save utm parameters.
  */
 function _iq_autocode_save_utm_parameters($target, ThirdPartySettingsInterface $type, FormStateInterface $form_state) {
   foreach (CodeController::UTM_VARS as $utmVar) {
@@ -459,7 +452,7 @@ function _iq_autocode_save_utm_parameters($target, ThirdPartySettingsInterface $
 }
 
 /**
- *
+ * Helper to add autocode output to entity edit forms.
  */
 function _iq_autocode_add_autocode_output(&$form, $entity, $settings) {
   if (!empty($settings['qr_enable']) && $settings['qr_enable']) {

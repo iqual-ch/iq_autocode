@@ -19,9 +19,10 @@ use Drupal\Core\Form\FormStateInterface;
 class AutoCodeFormatter extends Barcode {
 
   /**
-   *
+   * {@inheritDoc}
    */
   public function settingsForm(array $form, FormStateInterface $form_state) {
+    // Hide the type selection from the settings form.
     $settings = parent::settingsForm($form, $form_state);
     $settings['type']['#type'] = 'hidden';
     return $settings;
