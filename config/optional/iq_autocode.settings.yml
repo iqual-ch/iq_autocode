@@ -1,0 +1,18 @@
+user:
+  qr_enable: null
+  qr_base_domain: null
+  qr_show: null
+  qr_show_url: null
+  qr_utm_source: null
+  qr_utm_medium: null
+  qr_utm_campaign: null
+  qr_utm_content: null
+  qr_utm_term: null
+  short_enable: null
+  short_base_domain: null
+  short_show_url: null
+  short_utm_source: null
+  short_utm_medium: null
+  short_utm_campaign: null
+  short_utm_content: null
+  short_utm_term: null
