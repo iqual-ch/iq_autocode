@@ -2,6 +2,7 @@
 
 namespace Drupal\iq_autocode\Controller;
 
+use Drupal\iq_autocode\UserThirdpartyWrapper;
 use Drupal\taxonomy\Entity\Vocabulary;
 use Drupal\taxonomy\Entity\Term;
 use Drupal\user\Entity\User;
@@ -17,7 +18,7 @@ use Symfony\Component\HttpFoundation\Response;
 class CodeController extends ControllerBase {
 
   /**
-   * 
+   *
    */
   public const UTM_VARS = [
     'utm_source', 'utm_medium', 'utm_campagin', 'utm_content', 'utm_term',
@@ -69,7 +70,7 @@ class CodeController extends ControllerBase {
     $id = intval($short_value, 36);
     if (is_numeric($id)) {
       $entity = User::load($id);
-      if (!empty($entity) && $entity->type->entity->getThirdPartySetting('iq_autocode', 'qr_enable', FALSE)) {
+      if (!empty($entity) && (new UserThirdpartyWrapper())->getThirdPartySetting('iq_autocode', 'qr_enable', FALSE)) {
         return $this->sendQrCode($entity);
       }
     }
@@ -148,11 +149,19 @@ class CodeController extends ControllerBase {
   }
 
   /**
-   * @todo Implement for users.
+   *
    */
   protected function resolveUserUrl(string $short_value, string $type) {
     $url = Url::fromRoute('<front>', [], ['absolute' => TRUE])->toString();
-
+    $url = Url::fromRoute('<front>', [], ['absolute' => TRUE])->toString();
+    $id = intval($short_value, 36);
+    if (is_numeric($id)) {
+      $entity = User::load($id);
+      if (!empty($entity)) {
+        $settings = (new UserThirdpartyWrapper())->getThirdPartySettings('iq_autocode');
+        $url = $this->createURL($entity, $settings, $type);
+      }
+    }
     return new RedirectResponse($url);
   }
 
@@ -176,12 +185,14 @@ class CodeController extends ControllerBase {
    *
    */
   protected function createUrl($entity, $settings, $type) {
+    $tokenService = \Drupal::service('token');
     if (!empty($settings[$type . '_enable']) && $settings[$type . '_enable']) {
       $query = [];
       foreach (self::UTM_VARS as $utmvar) {
         $settingName = $type . '_' . $utmvar;
-        if (!empty($settings[$settingName])) {
-          $query[$utmvar] = $settings[$settingName];
+        $value = $value = $tokenService->replace($settings[$settingName], [$entity->getEntityTypeId() => $entity], ['clear' => TRUE]);
+        if (!empty($value)) {
+          $query[$utmvar] = $value;
         }
       }
       return $entity->toURL(

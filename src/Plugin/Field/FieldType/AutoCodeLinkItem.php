@@ -2,6 +2,7 @@
 
 namespace Drupal\iq_autocode\Plugin\Field\FieldType;
 
+use Drupal\iq_autocode\UserThirdpartyWrapper;
 use Drupal\taxonomy\Entity\Vocabulary;
 use Drupal\link\Plugin\Field\FieldType\LinkItem;
 
@@ -64,6 +65,10 @@ class AutoCodeLinkItem extends LinkItem {
         if ($entity->getEntityTypeId() == 'taxonomy_term') {
           $host = Vocabulary::load($entity->bundle())->getThirdPartySetting('iq_autocode', 'qr_base_domain', \Drupal::request()->getSchemeAndHttpHost());
           $prefix = 'tc';
+        }
+        if ($entity->getEntityTypeId() == 'user') {
+          $host = (new UserThirdpartyWrapper())->getThirdPartySetting('iq_autocode', 'qr_base_domain', \Drupal::request()->getSchemeAndHttpHost());
+          $prefix = 'uc';
         }
 
         $value = [

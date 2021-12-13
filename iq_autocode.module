@@ -13,6 +13,14 @@ use Drupal\Core\Url;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\iq_autocode\UserThirdpartyWrapper;
+
+/**
+ *
+ */
+function iq_autocode_form_alter(array &$form, FormStateInterface $form_state, $formId) {
+  echo $formId;
+}
 
 /**
  *
@@ -27,7 +35,9 @@ function iq_autocode_form_node_type_form_alter(array &$form, FormStateInterface 
  *
  */
 function iq_autocode_form_user_admin_settings_alter(array &$form, FormStateInterface $form_state) {
-  // @todo User does not support thirdparty settings..
+  // _iq_autocode_build_form($type, $form, $form_state);
+  $type = new UserThirdpartyWrapper();
+  _iq_autocode_build_form($type, $form, $form_state);
 }
 
 /**
@@ -48,6 +58,9 @@ function iq_autocode_entity_bundle_field_info(EntityTypeInterface $entity_type, 
   }
   if ($entity_type->id() == 'taxonomy_term') {
     $type = Vocabulary::load($bundle);
+  }
+  if ($entity_type->id() == 'user') {
+    $type = new UserThirdpartyWrapper();
   }
   if (!empty($type)) {
     if ($type->getThirdPartySetting('iq_autocode', 'qr_enable')) {
@@ -92,6 +105,16 @@ function iq_autocode_form_node_form_alter(&$form, &$form_state, $form_id) {
 
   $entity = $form_state->getFormObject()->getEntity();
   $settings = $entity->type->entity->getThirdPartySettings('iq_autocode');
+  _iq_autocode_add_autocode_output($form, $entity, $settings);
+}
+
+/**
+ *
+ */
+function iq_autocode_form_user_form_alter(&$form, &$form_state, $form_id) {
+
+  $entity = $form_state->getFormObject()->getEntity();
+  $settings = (new UserThirdpartyWrapper())->getThirdPartySettings('iq_autocode');
   _iq_autocode_add_autocode_output($form, $entity, $settings);
 }
 
@@ -332,7 +355,17 @@ function _iq_autocode_build_form(ThirdPartySettingsInterface $type, array &$form
   ];
   $form['iq_autocode']['short_link'] += _iq_autocode_get_utm_fields('short', $type);
 
-  $form['#entity_builders'][] = '_iq_autocode_form_type_form_builder';
+  if ($type->getEntityTypeId() == 'user') {
+    foreach (array_keys($form['actions']) as $action) {
+      if ($action != 'preview' && isset($form['actions'][$action]['#type']) && $form['actions'][$action]['#type'] === 'submit') {
+        $form['actions'][$action]['#submit'][] = '_iq_autocode_form_submit';
+      }
+    }
+  }
+  else {
+    $form['#entity_builders'][] = '_iq_autocode_form_type_form_builder';
+  }
+
 }
 
 /**
@@ -365,6 +398,14 @@ function _iq_autocode_get_utm_fields($target, ThirdPartySettingsInterface $type)
     '#show_restricted' => TRUE,
   ];
   return $fields;
+}
+
+/**
+ *
+ */
+function _iq_autocode_form_submit(array $form, FormStateInterface $form_state) {
+  $type = new UserThirdpartyWrapper();
+  _iq_autocode_form_type_form_builder(NULL, $type, $form, $form_state);
 }
 
 /**
@@ -416,6 +457,10 @@ function _iq_autocode_add_autocode_output(&$form, $entity, $settings) {
 
     if ($entity->getEntityTypeId() == 'taxonomy_term') {
       $prefix = 'tc';
+    }
+    
+    if ($entity->getEntityTypeId() == 'user') {
+      $prefix = 'uc';
     }
     $form['meta']['iq_autocode_qr_container'] = [
       '#type' => 'fieldset',

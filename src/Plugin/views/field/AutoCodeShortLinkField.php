@@ -29,8 +29,6 @@ class AutoCodeShortLinkField extends Url {
   public function render(ResultRow $values) {
     $value = $this->getValue($values);
     if (!empty($this->options['display_as_link'])) {
-      // @todo Views should expect and store a leading /. See:
-      //   https://www.drupal.org/node/2423913
       return Link::fromTextAndUrl($this->sanitizeValue($value), CoreUrl::fromUri($value))->toString();
     }
     else {
