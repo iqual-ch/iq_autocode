@@ -189,6 +189,7 @@ function iq_autocode_token_info() {
     [
       'node' => $autocodeTokens,
       'term' => $autocodeTokens,
+      'user' => $autocodeTokens,
     ],
   ];
 
@@ -200,17 +201,26 @@ function iq_autocode_token_info() {
  */
 function iq_autocode_tokens($type, $tokens, array $data, array $options, BubbleableMetadata $bubbleable_metadata) {
   $replacements = [];
-  if ($type == 'node' || $type == 'term') {
-    if ($type == 'term') {
+  switch ($type) {
+    case 'node':
+      $entity = $data['node'];
+      $entityType = $entity->type->entity;
+      $prefix = 'tc';
+      break;
+
+    case 'term':
       $entity = $data['term'];
       $entityType = Vocabulary::load($entity->bundle());
       $prefix = 'tc';
-    }
-    else {
-      $entity = $data['node'];
-      $entityType = $entity->type->entity;
-      $prefix = 'nc';
-    }
+      break;
+
+    case 'user':
+      $entity = $data['user'];
+      $entityType = new UserThirdpartyWrapper();
+      $prefix = 'uc';
+      break;
+  }
+  if (!empty($entityType)) {
     foreach ($tokens as $name => $original) {
       // Find the desired token by name.
       switch ($name) {
@@ -458,7 +468,7 @@ function _iq_autocode_add_autocode_output(&$form, $entity, $settings) {
     if ($entity->getEntityTypeId() == 'taxonomy_term') {
       $prefix = 'tc';
     }
-    
+
     if ($entity->getEntityTypeId() == 'user') {
       $prefix = 'uc';
     }

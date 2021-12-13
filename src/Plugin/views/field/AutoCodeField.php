@@ -28,11 +28,14 @@ class AutoCodeField extends FieldPluginBase {
     elseif (isset($relationship_entities['taxonomy_term'])) {
       $entity = $relationship_entities['taxonomy_term'];
     }
+    elseif (isset($relationship_entities['user'])) {
+      $entity = $relationship_entities['user'];
+    }
     else {
       $entity = $values->_entity;
     }
 
-    if ($entity->getEntityTypeId() === 'node' || $entity->getEntityTypeId() === 'taxonomy_term') {
+    if (in_array($entity->getEntityTypeId(), ['node', 'taxonomy_term', 'user'])) {
       $value = $entity->iq_autocode->view([
         'type' => 'iq_autocode',
         'label' => '',
@@ -45,6 +48,9 @@ class AutoCodeField extends FieldPluginBase {
 
       if ($entity->getEntityTypeId() == 'taxonomy_term') {
         $prefix = 'tc';
+      }
+      if ($entity->getEntityTypeId() == 'user') {
+        $prefix = 'uc';
       }
       $value['#prefix'] = '<a href="/iq_autocode/' . $prefix . '/' . base_convert($entity->id(), 10, 36) . '" target="_blank">';
       $value['#suffix'] = '</a>';
