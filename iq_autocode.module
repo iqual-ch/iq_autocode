@@ -69,7 +69,7 @@ function iq_autocode_entity_bundle_field_info(EntityTypeInterface $entity_type, 
         ->setDisplayOptions('view', [
           'label' => 'hidden',
           'weight' => -5,
-          'type' => 'iq_autocode',
+          'type' => 'hidden',
         ]);
     }
     if ($type->getThirdPartySetting('iq_autocode', 'short_enable')) {
@@ -84,7 +84,7 @@ function iq_autocode_entity_bundle_field_info(EntityTypeInterface $entity_type, 
         ->setDisplayOptions('view', [
           'label' => 'hidden',
           'weight' => -5,
-          'type' => 'iq_autocode_shortlink',
+          'type' => 'hidden',
         ]);
       return $fields;
     }
