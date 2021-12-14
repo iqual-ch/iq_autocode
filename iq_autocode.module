@@ -489,6 +489,7 @@ function _iq_autocode_add_autocode_output(&$form, $entity, $settings) {
         '#type' => 'link',
         '#url' => $url,
         '#title' => $url->toString(),
+        '#attributes' => ['target' => '_blank'],
       ];
     }
   }
@@ -504,6 +505,7 @@ function _iq_autocode_add_autocode_output(&$form, $entity, $settings) {
         '#type' => 'link',
         '#url' => $url,
         '#title' => $url->toString(),
+        '#attributes' => ['target' => '_blank'],
       ];
     }
   }
