@@ -475,11 +475,11 @@ function _iq_autocode_add_autocode_output(&$form, $entity, $settings) {
         'type' => 'iq_autocode',
         'label' => '',
         'settings' => [
-          'height' => 400,
-          'width' => 400,
+          'height' => 200,
+          'width' => 200,
         ],
       ]);
-
+      $form['meta']['iq_autocode_qr_container']['iq_autocode']['#label_display'] = 'hidden';
       $form['meta']['iq_autocode_qr_container']['iq_autocode']['#prefix'] = '<a href="/iq_autocode/' . $prefix . '/' . base_convert($entity->id(), 10, 36) . '" target="_blank">';
       $form['meta']['iq_autocode_qr_container']['iq_autocode']['#suffix'] = '</a>';
     }
