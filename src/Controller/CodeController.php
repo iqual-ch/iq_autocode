@@ -267,7 +267,7 @@ class CodeController extends ControllerBase {
    *
    * @param \Drupal\Core\Entity\EntityInterface $entity
    *   The targeted entity.
-   * @param Drupal\Core\Config\Entity\ThirdpartySettingsInterface $settings
+   * @param array $settings
    *   The settings for this entity.
    * @param string $type
    *   The tzpe of short url (qr or short).
@@ -275,7 +275,7 @@ class CodeController extends ControllerBase {
    * @return \Drupal\Core\Url
    *   The Url to the entity or the front page.
    */
-  protected function createUrl(EntityInterface $entity, ThirdpartySettingsInterface $settings, string $type) {
+  protected function createUrl(EntityInterface $entity, array $settings, string $type) {
     $tokenService = \Drupal::service('token');
     if (!empty($settings[$type . '_enable']) && $settings[$type . '_enable']) {
       $query = [];
