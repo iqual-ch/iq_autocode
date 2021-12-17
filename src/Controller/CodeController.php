@@ -2,7 +2,10 @@
 
 namespace Drupal\iq_autocode\Controller;
 
-use Drupal\Core\Config\Entity\ThirdpartySettingsInterface;
+use Drupal\Core\Language\LanguageInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
+use Drupal\Core\Language\LanguageManager;
+use Drupal\Core\Utility\Token;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\iq_autocode\UserThirdpartyWrapper;
 use Drupal\taxonomy\Entity\Vocabulary;
@@ -20,11 +23,48 @@ use Symfony\Component\HttpFoundation\Response;
 class CodeController extends ControllerBase {
 
   /**
+   * The token utility.
+   *
+   * @var Drupal\Core\Utility\Token
+   */
+  protected $tokenService = NULL;
+
+  /**
+   * The language manager.
+   *
+   * @var Drupal\Core\Language\LanguageManager
+   */
+  protected $languageManager = NULL;
+
+  /**
    * The possible utm variables.
    */
   public const UTM_VARS = [
     'utm_source', 'utm_medium', 'utm_campagin', 'utm_content', 'utm_term',
   ];
+
+  /**
+   * Creates a new CodeController.
+   *
+   * @param Drupal\Core\Utility\Token $token
+   *   The token utility.
+   * @param \Drupal\Core\Language\LanguageManager $language_manager
+   *   The language manager.
+   */
+  public function __construct(Token $token, LanguageManager $language_manager) {
+    $this->tokenService = $token;
+    $this->languageManager = $language_manager;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public static function create(ContainerInterface $container) {
+    return new static(
+          $container->get('token'),
+          $container->get('language_manager')
+      );
+  }
 
   /**
    * Resolves a short value to a node (or front page).
@@ -276,26 +316,30 @@ class CodeController extends ControllerBase {
    *   The Url to the entity or the front page.
    */
   protected function createUrl(EntityInterface $entity, array $settings, string $type) {
-    $tokenService = \Drupal::service('token');
     if (!empty($settings[$type . '_enable']) && $settings[$type . '_enable']) {
       $query = [];
       foreach (self::UTM_VARS as $utmvar) {
         $settingName = $type . '_' . $utmvar;
-        $value = $value = $tokenService->replace($settings[$settingName], [$entity->getEntityTypeId() => $entity], ['clear' => TRUE]);
+        $value = $value = $this->tokenService->replace($settings[$settingName], [$entity->getEntityTypeId() => $entity], ['clear' => TRUE]);
         if (!empty($value)) {
           $query[$utmvar] = $value;
         }
       }
+
+      // Get the current language based on content language selection settings
+      // as Drupal returns default language on Entity::toUrl.
+      // @see https://www.drupal.org/project/drupal/issues/3061761
+      $currentLanguage = $this->languageManager->getCurrentLanguage(LanguageInterface::TYPE_CONTENT);
       return $entity->toURL(
       'canonical',
       [
         'query' => $query,
+        'language' => $currentLanguage,
       ]
         )
         ->toString();
     }
     return Url::fromRoute('<front>', [], ['absolute' => TRUE])->toString();
-
   }
 
 }
