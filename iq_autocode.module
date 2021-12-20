@@ -455,6 +455,9 @@ function _iq_autocode_save_utm_parameters($target, ThirdPartySettingsInterface $
  * Helper to add autocode output to entity edit forms.
  */
 function _iq_autocode_add_autocode_output(&$form, $entity, $settings) {
+  if ($entity->isNew()) {
+    return;
+  }
   if (!empty($settings['qr_enable']) && $settings['qr_enable']) {
     $prefix = 'nc';
 
