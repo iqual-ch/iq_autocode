@@ -40,7 +40,7 @@ class CodeController extends ControllerBase {
    * The possible utm variables.
    */
   public const UTM_VARS = [
-    'utm_source', 'utm_medium', 'utm_campagin', 'utm_content', 'utm_term',
+    'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term',
   ];
 
   /**
