@@ -196,21 +196,27 @@ function iq_autocode_tokens($type, $tokens, array $data, array $options, Bubblea
   $replacements = [];
   switch ($type) {
     case 'node':
-      $entity = $data['node'];
-      $entityType = $entity->type->entity;
-      $prefix = 'tc';
+      if (!empty($data['node'])) {
+        $entity = $data['node'];
+        $entityType = $entity->type->entity;
+        $prefix = 'tc';
+      }
       break;
 
     case 'term':
-      $entity = $data['term'];
-      $entityType = Vocabulary::load($entity->bundle());
-      $prefix = 'tc';
+      if (!empty($data['term'])) {
+        $entity = $data['term'];
+        $entityType = Vocabulary::load($entity->bundle());
+        $prefix = 'tc';
+      }
       break;
 
     case 'user':
-      $entity = $data['user'];
-      $entityType = new UserThirdpartyWrapper();
-      $prefix = 'uc';
+      if (!empty($data['user'])) {
+        $entity = $data['user'];
+        $entityType = new UserThirdpartyWrapper();
+        $prefix = 'uc';
+      }
       break;
   }
   if (!empty($entityType)) {
