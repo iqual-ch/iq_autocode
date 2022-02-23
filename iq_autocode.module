@@ -196,24 +196,33 @@ function iq_autocode_tokens($type, $tokens, array $data, array $options, Bubblea
   $replacements = [];
   switch ($type) {
     case 'node':
-      if (!empty($data['node'])) {
-        $entity = $data['node'];
+      if (!empty($data[$type])) {
+        $entity = $data[$type];
+        if ($entity->isNew()) {
+          $entity = \Drupal::entityTypeManager()->getStorage($type)->loadUnchanged($entity->id());
+        }
         $entityType = $entity->type->entity;
         $prefix = 'tc';
       }
       break;
 
     case 'term':
-      if (!empty($data['term'])) {
-        $entity = $data['term'];
+      if (!empty($data[$type])) {
+        $entity = $data[$type];
+        if ($entity->isNew()) {
+          $entity = \Drupal::entityTypeManager()->getStorage($type)->loadUnchanged($entity->id());
+        }
         $entityType = Vocabulary::load($entity->bundle());
         $prefix = 'tc';
       }
       break;
 
     case 'user':
-      if (!empty($data['user'])) {
-        $entity = $data['user'];
+      if (!empty($data[$type])) {
+        $entity = $data[$type];
+        if ($entity->isNew()) {
+          $entity = \Drupal::entityTypeManager()->getStorage($type)->loadUnchanged($entity->id());
+        }
         $entityType = new UserThirdpartyWrapper();
         $prefix = 'uc';
       }
