@@ -2,12 +2,14 @@
 
 /**
  * @file
+ * Module file for iq_autocode.
  */
 
 use Drupal\Core\Render\BubbleableMetadata;
 use Drupal\taxonomy\Entity\Vocabulary;
 use Drupal\node\Entity\NodeType;
 use Drupal\Core\Config\Entity\ThirdPartySettingsInterface;
+use Drupal\Core\Entity\EntityFormInterface;
 use Drupal\iq_autocode\Controller\CodeController;
 use Drupal\Core\Url;
 use Drupal\Core\Field\BaseFieldDefinition;
@@ -19,9 +21,13 @@ use Drupal\iq_autocode\UserThirdpartyWrapper;
  * Implements hook_form_node_type_form_alter().
  */
 function iq_autocode_form_node_type_form_alter(array &$form, FormStateInterface $form_state) {
-  /** @var \Drupal\node\NodeTypeInterface $type */
-  $type = $form_state->getFormObject()->getEntity();
-  _iq_autocode_build_form($type, $form, $form_state);
+  if ($form_state->getFormObject() instanceof EntityFormInterface) {
+    /** @var \Drupal\Core\Entity\EntityFormInterface $formObject */
+    $formObject = $form_state->getFormObject();
+    /** @var \Drupal\node\NodeTypeInterface $type */
+    $type = $formObject->getEntity();
+    _iq_autocode_build_form($type, $form, $form_state);
+  }
 }
 
 /**
@@ -37,9 +43,13 @@ function iq_autocode_form_user_admin_settings_alter(array &$form, FormStateInter
  * Implements hook_form_taxonomy_vocabulary_form_alter().
  */
 function iq_autocode_form_taxonomy_vocabulary_form_alter(array &$form, FormStateInterface $form_state) {
-  /** @var \Drupal\taxonomy\VocabularyInterface $type */
-  $type = $form_state->getFormObject()->getEntity();
-  _iq_autocode_build_form($type, $form, $form_state);
+  if ($form_state->getFormObject() instanceof EntityFormInterface) {
+    /** @var \Drupal\Core\Entity\EntityFormInterface $formObject */
+    $formObject = $form_state->getFormObject();
+    /** @var \Drupal\node\NodeTypeInterface $type */
+    $type = $formObject->getEntity();
+    _iq_autocode_build_form($type, $form, $form_state);
+  }
 }
 
 /**
@@ -194,35 +204,29 @@ function iq_autocode_token_info() {
  */
 function iq_autocode_tokens($type, $tokens, array $data, array $options, BubbleableMetadata $bubbleable_metadata) {
   $replacements = [];
+  $entity = NULL;
+  $entityType = NULL;
+  $prefix = '';
   switch ($type) {
     case 'node':
-      if (!empty($data[$type])) {
-        $entity = $data[$type];
-        if ($entity->isNew()) {
-          $entity = \Drupal::entityTypeManager()->getStorage($type)->loadUnchanged($entity->id());
-        }
+      if (!empty($data['node'])) {
+        $entity = $data['node'];
         $entityType = $entity->type->entity;
         $prefix = 'tc';
       }
       break;
 
     case 'term':
-      if (!empty($data[$type])) {
-        $entity = $data[$type];
-        if ($entity->isNew()) {
-          $entity = \Drupal::entityTypeManager()->getStorage($type)->loadUnchanged($entity->id());
-        }
+      if (!empty($data['term'])) {
+        $entity = $data['term'];
         $entityType = Vocabulary::load($entity->bundle());
         $prefix = 'tc';
       }
       break;
 
     case 'user':
-      if (!empty($data[$type])) {
-        $entity = $data[$type];
-        if ($entity->isNew()) {
-          $entity = \Drupal::entityTypeManager()->getStorage($type)->loadUnchanged($entity->id());
-        }
+      if (!empty($data['user'])) {
+        $entity = $data['user'];
         $entityType = new UserThirdpartyWrapper();
         $prefix = 'uc';
       }
@@ -294,16 +298,7 @@ function _iq_autocode_build_form(ThirdPartySettingsInterface $type, array &$form
       ],
     ],
   ];
-  // $form['iq_autocode']['qr_code']['token_tree_domain'] = [
-  //   '#theme' => 'token_tree_link',
-  //   '#token_types' => ['domain'],
-  //   '#show_restricted' => TRUE,
-  //   '#states' => [
-  //     'visible' => [
-  //       ':input[name="iq_autocode_qr_enable"]' => ['checked' => TRUE],
-  //     ],
-  //   ],
-  // ];
+
   $form['iq_autocode']['qr_code']['iq_autocode_qr_show'] = [
     '#type' => 'checkbox',
     '#title' => t('Show the qr code on edit form'),
@@ -350,16 +345,7 @@ function _iq_autocode_build_form(ThirdPartySettingsInterface $type, array &$form
       ],
     ],
   ];
-  // $form['iq_autocode']['short_link']['token_tree_domain'] = [
-  //   '#theme' => 'token_tree_link',
-  //   '#token_types' => ['domain'],
-  //   '#show_restricted' => TRUE,
-  //   '#states' => [
-  //     'visible' => [
-  //       ':input[name="iq_autocode_short_enable"]' => ['checked' => TRUE],
-  //     ],
-  //   ],
-  // ];
+
   $form['iq_autocode']['short_link']['iq_autocode_short_show_url'] = [
     '#type' => 'checkbox',
     '#title' => t('Show url on edit form'),
@@ -373,7 +359,7 @@ function _iq_autocode_build_form(ThirdPartySettingsInterface $type, array &$form
   ];
   $form['iq_autocode']['short_link'] += _iq_autocode_get_utm_fields('short', $type);
 
-  if ($type->getEntityTypeId() == 'user') {
+  if (method_exists($type, 'getEntityTypeId') && $type->getEntityTypeId() == 'user') {
     foreach (array_keys($form['actions']) as $action) {
       if ($action != 'preview' && isset($form['actions'][$action]['#type']) && $form['actions'][$action]['#type'] === 'submit') {
         $form['actions'][$action]['#submit'][] = '_iq_autocode_form_submit';
@@ -410,11 +396,13 @@ function _iq_autocode_get_utm_fields($target, ThirdPartySettingsInterface $type)
       '#default_value' => $type->getThirdPartySetting('iq_autocode', $target . '_' . $utmVar, ''),
     ];
   }
-  $fields['utm_params']['token_tree'] = [
-    '#theme' => 'token_tree_link',
-    '#token_types' => [str_replace('_type', '', $type->getEntityTypeId())],
-    '#show_restricted' => TRUE,
-  ];
+  if (method_exists($type, 'getEntityTypeId')) {
+    $fields['utm_params']['token_tree'] = [
+      '#theme' => 'token_tree_link',
+      '#token_types' => [str_replace('_type', '', $type->getEntityTypeId())],
+      '#show_restricted' => TRUE,
+    ];
+  }
   return $fields;
 }
 
@@ -473,7 +461,7 @@ function _iq_autocode_add_autocode_output(&$form, $entity, $settings) {
   if ($entity->isNew()) {
     return;
   }
-  if (!empty($settings['qr_enable']) && $settings['qr_enable']) {
+  if (!empty($settings['qr_enable'])) {
     $prefix = 'nc';
 
     if ($entity->getEntityTypeId() == 'taxonomy_term') {
@@ -511,7 +499,7 @@ function _iq_autocode_add_autocode_output(&$form, $entity, $settings) {
       ];
     }
   }
-  if (!empty($settings['short_enable']) && $settings['short_enable']) {
+  if (!empty($settings['short_enable'])) {
     if ($settings['short_show_url']) {
       $url = Url::fromUri($entity->iq_autocode_short_link->uri);
       $form['meta']['iq_autocode_short_link_container'] = [

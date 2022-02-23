@@ -2,14 +2,14 @@
 
 namespace Drupal\iq_autocode;
 
-use Drupal\Core\Config\Entity\ThirdpartySettingsInterface;
+use Drupal\Core\Config\Entity\ThirdPartySettingsInterface;
 
 /**
  * Emulates ThirdpartySettingsInterface for the user type.
  *
  * This simplifies the rest of the module code.
  */
-class UserThirdpartyWrapper implements ThirdpartySettingsInterface {
+class UserThirdpartyWrapper implements ThirdPartySettingsInterface {
 
   /**
    * The config prefix.

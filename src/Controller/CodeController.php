@@ -13,6 +13,7 @@ use Drupal\taxonomy\Entity\Term;
 use Drupal\user\Entity\User;
 use Drupal\node\Entity\Node;
 use Drupal\Core\Controller\ControllerBase;
+use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Url;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -25,16 +26,16 @@ class CodeController extends ControllerBase {
   /**
    * The token utility.
    *
-   * @var Drupal\Core\Utility\Token
+   * @var \Drupal\Core\Utility\Token
    */
-  protected $tokenService = NULL;
+  protected $tokenService;
 
   /**
    * The language manager.
    *
-   * @var Drupal\Core\Language\LanguageManager
+   * @var \Drupal\Core\Language\LanguageManager
    */
-  protected $languageManager = NULL;
+  protected $languageManager;
 
   /**
    * The possible utm variables.
@@ -46,7 +47,7 @@ class CodeController extends ControllerBase {
   /**
    * Creates a new CodeController.
    *
-   * @param Drupal\Core\Utility\Token $token
+   * @param \Drupal\Core\Utility\Token $token
    *   The token utility.
    * @param \Drupal\Core\Language\LanguageManager $language_manager
    *   The language manager.
@@ -118,10 +119,13 @@ class CodeController extends ControllerBase {
     $id = intval($short_value, 36);
     if (is_numeric($id)) {
       $entity = Node::load($id);
-      if (!empty($entity) && $entity->type->entity->getThirdPartySetting('iq_autocode', 'qr_enable', FALSE)) {
+      /** @var \Drupal\node\Entity\NodeType $entityType */
+      $entityType = $entity->type->entity;
+      if (!empty($entity) && $entityType->getThirdPartySetting('iq_autocode', 'qr_enable', FALSE)) {
         return $this->sendQrCode($entity);
       }
     }
+    return new Response('', 404);
   }
 
   /**
@@ -141,6 +145,7 @@ class CodeController extends ControllerBase {
         return $this->sendQrCode($entity);
       }
     }
+    return new Response('', 404);
   }
 
   /**
@@ -161,6 +166,7 @@ class CodeController extends ControllerBase {
         return $this->sendQrCode($entity);
       }
     }
+    return new Response('', 404);
   }
 
   /**
@@ -205,14 +211,14 @@ class CodeController extends ControllerBase {
   /**
    * Helper function to create the qr download response.
    *
-   * @param \Drupal\Core\Entity\EntityInterface $entity
+   * @param \Drupal\Core\Entity\ContentEntityInterface $entity
    *   The entity to create the qr code.
    *
    * @return \Symfony\Component\HttpFoundation\Response
    *   The response.
    */
-  protected function sendQrCode(EntityInterface $entity) {
-    $svgCode = $entity->iq_autocode->view([
+  protected function sendQrCode(ContentEntityInterface $entity) {
+    $svgCode = $entity->get('iq_autocode')->view([
       'type' => 'iq_autocode',
       'label' => t('QR Code'),
       'settings' => [
@@ -237,7 +243,7 @@ class CodeController extends ControllerBase {
    * @param string $type
    *   The type of link to resolve (qr or short).
    *
-   * @return Symfony\Component\HttpFoundation\RedirectResponse
+   * @return \Symfony\Component\HttpFoundation\RedirectResponse
    *   The redirect response to the node.
    */
   protected function resolveNodeUrl(string $short_value, string $type) {
@@ -245,8 +251,11 @@ class CodeController extends ControllerBase {
     $id = intval($short_value, 36);
     if (is_numeric($id)) {
       $entity = Node::load($id);
+
       if (!empty($entity)) {
-        $settings = $entity->type->entity->getThirdPartySettings('iq_autocode');
+        /** @var \Drupal\node\Entity\NodeType $nodeType */
+        $nodeType = $entity->type->entity;
+        $settings = $nodeType->getThirdPartySettings('iq_autocode');
         $url = $this->createURL($entity, $settings, $type);
       }
     }
@@ -261,11 +270,10 @@ class CodeController extends ControllerBase {
    * @param string $type
    *   The type of link to resolve (qr or short).
    *
-   * @return Symfony\Component\HttpFoundation\RedirectResponse
+   * @return \Symfony\Component\HttpFoundation\RedirectResponse
    *   The redirect response to the user.
    */
   protected function resolveUserUrl(string $short_value, string $type) {
-    $url = Url::fromRoute('<front>', [], ['absolute' => TRUE])->toString();
     $url = Url::fromRoute('<front>', [], ['absolute' => TRUE])->toString();
     $id = intval($short_value, 36);
     if (is_numeric($id)) {
@@ -286,7 +294,7 @@ class CodeController extends ControllerBase {
    * @param string $type
    *   The type of link to resolve (qr or short).
    *
-   * @return Symfony\Component\HttpFoundation\RedirectResponse
+   * @return \Symfony\Component\HttpFoundation\RedirectResponse
    *   The redirect response to the term.
    */
   protected function resolveTermUrl(string $short_value, string $type) {
@@ -312,11 +320,11 @@ class CodeController extends ControllerBase {
    * @param string $type
    *   The tzpe of short url (qr or short).
    *
-   * @return \Drupal\Core\Url
+   * @return string
    *   The Url to the entity or the front page.
    */
-  protected function createUrl(EntityInterface $entity, array $settings, string $type) {
-    if (!empty($settings[$type . '_enable']) && $settings[$type . '_enable']) {
+  protected function createUrl(EntityInterface $entity, array $settings, string $type): string {
+    if (!empty($settings[$type . '_enable'])) {
       $query = [];
       foreach (self::UTM_VARS as $utmvar) {
         $settingName = $type . '_' . $utmvar;
