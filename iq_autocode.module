@@ -203,36 +203,46 @@ function iq_autocode_token_info() {
  * Implements hook_tokens().
  */
 function iq_autocode_tokens($type, $tokens, array $data, array $options, BubbleableMetadata $bubbleable_metadata) {
+  $keys = array_intersect(
+    ['iqac_short_link', 'iqac_qr_link', 'iqac_qr_download_link'],
+    array_keys($tokens)
+  );
+  if (empty($keys)) {
+    return;
+  }
   $replacements = [];
   $entity = NULL;
   $entityType = NULL;
   $prefix = '';
   switch ($type) {
     case 'node':
-      if (!empty($data['node'])) {
-        $entity = $data['node'];
+      if (!empty($data[$type])) {
+        $entity = $data[$type];
+        $entity = \Drupal::entityTypeManager()->getStorage($type)->loadUnchanged($entity->id());
         $entityType = $entity->type->entity;
         $prefix = 'tc';
       }
       break;
 
     case 'term':
-      if (!empty($data['term'])) {
-        $entity = $data['term'];
+      if (!empty($data[$type])) {
+        $entity = $data[$type];
+        $entity = \Drupal::entityTypeManager()->getStorage($type)->loadUnchanged($entity->id());
         $entityType = Vocabulary::load($entity->bundle());
         $prefix = 'tc';
       }
       break;
 
     case 'user':
-      if (!empty($data['user'])) {
-        $entity = $data['user'];
+      if (!empty($data[$type])) {
+        $entity = $data[$type];
+        $entity = \Drupal::entityTypeManager()->getStorage($type)->loadUnchanged($entity->id());
         $entityType = new UserThirdpartyWrapper();
         $prefix = 'uc';
       }
       break;
   }
-  if (!empty($entityType)) {
+  if (!empty($entity) && !empty($entityType)) {
     foreach ($tokens as $name => $original) {
       // Find the desired token by name.
       switch ($name) {
