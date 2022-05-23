@@ -73,7 +73,7 @@ class ShortLinkLinkItem extends LinkItem {
         }
         if ($entity->getEntityTypeId() == 'redirect') {
           $host = (new RedirectThirdpartyWrapper())->getThirdPartySetting('iq_autocode', 'qr_base_domain', \Drupal::request()->getSchemeAndHttpHost());
-          $prefix = 'rc';
+          $prefix = 'rs';
         }
 
         $value = [
