@@ -8,6 +8,7 @@ use Drupal\Core\Language\LanguageManager;
 use Drupal\Core\Utility\Token;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\iq_autocode\UserThirdpartyWrapper;
+use Drupal\iq_autocode\RedirectThirdpartyWrapper;
 use Drupal\taxonomy\Entity\Vocabulary;
 use Drupal\taxonomy\Entity\Term;
 use Drupal\user\Entity\User;
@@ -107,6 +108,19 @@ class CodeController extends ControllerBase {
   }
 
   /**
+   * Resolves a short value to a term (or front page).
+   *
+   * @param string $short_value
+   *   The short value to resolve.
+   *
+   * @return \Symfony\Component\HttpFoundation\Response
+   *   The response.
+   */
+  public function resolveRedirectUrlQr(string $short_value) {
+    return $this->resolveRedirectUrl($short_value, 'qr');
+  }
+
+  /**
    * Returns a download response for the node qr code.
    *
    * @param string $short_value
@@ -170,6 +184,26 @@ class CodeController extends ControllerBase {
   }
 
   /**
+   * Returns a download response for the term qr code.
+   *
+   * @param string $short_value
+   *   The short value to resolve.
+   *
+   * @return \Symfony\Component\HttpFoundation\Response
+   *   The response.
+   */
+  public function downloadRedirectQr(string $short_value) {
+    $id = intval($short_value, 36);
+    if (is_numeric($id)) {
+      $entity = User::load($id);
+      if (!empty($entity) && (new RedirectThirdpartyWrapper())->getThirdPartySetting('iq_autocode', 'qr_enable', FALSE)) {
+        return $this->sendQrCode($entity);
+      }
+    }
+    return new Response('', 404);
+  }
+
+  /**
    * Resolves a short value to a node (or front page).
    *
    * @param string $short_value
@@ -206,6 +240,19 @@ class CodeController extends ControllerBase {
    */
   public function resolveTermUrlShort(string $short_value) {
     return $this->resolveTermUrl($short_value, 'short');
+  }
+
+  /**
+   * Resolves a short value to a term (or front page).
+   *
+   * @param string $short_value
+   *   The short value to resolve.
+   *
+   * @return \Symfony\Component\HttpFoundation\Response
+   *   The response.
+   */
+  public function resolveRedirectUrlShort(string $short_value) {
+    return $this->resolveRedirectUrl($short_value, 'short');
   }
 
   /**
@@ -304,6 +351,30 @@ class CodeController extends ControllerBase {
       $entity = Term::load($id);
       if (!empty($entity)) {
         $settings = Vocabulary::load($entity->bundle())->getThirdPartySettings('iq_autocode');
+        $url = $this->createURL($entity, $settings, $type);
+      }
+    }
+    return new RedirectResponse($url);
+  }
+
+  /**
+   * Helper to resolve a short url to the user and type (qr/short).
+   *
+   * @param string $short_value
+   *   The short value to resolve.
+   * @param string $type
+   *   The type of link to resolve (qr or short).
+   *
+   * @return \Symfony\Component\HttpFoundation\RedirectResponse
+   *   The redirect response to the user.
+   */
+  protected function resolveRedirectUrl(string $short_value, string $type) {
+    $url = Url::fromRoute('<front>', [], ['absolute' => TRUE])->toString();
+    $id = intval($short_value, 36);
+    if (is_numeric($id)) {
+      $entity = User::load($id);
+      if (!empty($entity)) {
+        $settings = (new UserThirdpartyWrapper())->getThirdPartySettings('iq_autocode');
         $url = $this->createURL($entity, $settings, $type);
       }
     }

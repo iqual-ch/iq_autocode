@@ -16,6 +16,7 @@ use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\iq_autocode\UserThirdpartyWrapper;
+use Drupal\iq_autocode\RedirectThirdpartyWrapper;
 
 /**
  * Implements hook_form_node_type_form_alter().
@@ -53,6 +54,14 @@ function iq_autocode_form_taxonomy_vocabulary_form_alter(array &$form, FormState
 }
 
 /**
+ * Implements hook_form_redirect_admin_settings_alter().
+ */
+function iq_autocode_form_redirect_settings_form_alter(array &$form, FormStateInterface $form_state) {
+  $type = new RedirectThirdpartyWrapper();
+  _iq_autocode_build_form($type, $form, $form_state);
+}
+
+/**
  * Implements hook_entity_base_field_info().
  */
 function iq_autocode_entity_bundle_field_info(EntityTypeInterface $entity_type, $bundle, array $base_field_definitions) {
@@ -64,6 +73,9 @@ function iq_autocode_entity_bundle_field_info(EntityTypeInterface $entity_type, 
   }
   if ($entity_type->id() == 'user') {
     $type = new UserThirdpartyWrapper();
+  }
+  if ($entity_type->id() == 'redirect') {
+    $type = new RedirectThirdpartyWrapper();
   }
   if (!empty($type)) {
     if ($type->getThirdPartySetting('iq_autocode', 'qr_enable')) {
@@ -118,6 +130,16 @@ function iq_autocode_form_user_form_alter(&$form, &$form_state, $form_id) {
 
   $entity = $form_state->getFormObject()->getEntity();
   $settings = (new UserThirdpartyWrapper())->getThirdPartySettings('iq_autocode');
+  _iq_autocode_add_autocode_output($form, $entity, $settings);
+}
+
+/**
+ * Implements hook_form_redirect_form_alter().
+ */
+function iq_autocode_form_redirect_redirect_edit_form_alter(&$form, &$form_state, $form_id) {
+
+  $entity = $form_state->getFormObject()->getEntity();
+  $settings = (new RedirectThirdpartyWrapper())->getThirdPartySettings('iq_autocode');
   _iq_autocode_add_autocode_output($form, $entity, $settings);
 }
 
@@ -193,6 +215,7 @@ function iq_autocode_token_info() {
       'node' => $autocodeTokens,
       'term' => $autocodeTokens,
       'user' => $autocodeTokens,
+      'redirect' => $autocodeTokens,
     ],
   ];
 
@@ -239,6 +262,15 @@ function iq_autocode_tokens($type, $tokens, array $data, array $options, Bubblea
         $entity = \Drupal::entityTypeManager()->getStorage($type)->loadUnchanged($entity->id());
         $entityType = new UserThirdpartyWrapper();
         $prefix = 'uc';
+      }
+      break;
+
+    case 'redirect':
+      if (!empty($data[$type])) {
+        $entity = $data[$type];
+        $entity = \Drupal::entityTypeManager()->getStorage($type)->loadUnchanged($entity->id());
+        $entityType = new RedirectThirdpartyWrapper();
+        $prefix = 'rc';
       }
       break;
   }
@@ -331,7 +363,10 @@ function _iq_autocode_build_form(ThirdPartySettingsInterface $type, array &$form
       ],
     ],
   ];
-  $form['iq_autocode']['qr_code'] += _iq_autocode_get_utm_fields('qr', $type);
+
+  if ($type->getEntityTypeId() != 'redirect') {
+    $form['iq_autocode']['qr_code'] += _iq_autocode_get_utm_fields('qr', $type);
+  }
 
   $form['iq_autocode']['short_link'] = [
     '#type' => 'details',
@@ -367,12 +402,22 @@ function _iq_autocode_build_form(ThirdPartySettingsInterface $type, array &$form
       ],
     ],
   ];
-  $form['iq_autocode']['short_link'] += _iq_autocode_get_utm_fields('short', $type);
 
-  if (method_exists($type, 'getEntityTypeId') && $type->getEntityTypeId() == 'user') {
+  if ($type->getEntityTypeId() != 'redirect') {
+    $form['iq_autocode']['short_link'] += _iq_autocode_get_utm_fields('short', $type);
+  }
+
+  if (
+    method_exists($type, 'getEntityTypeId') &&
+      (
+        $type->getEntityTypeId() == 'user'
+        ||
+        $type->getEntityTypeId() == 'redirect'
+      )
+    ) {
     foreach (array_keys($form['actions']) as $action) {
       if ($action != 'preview' && isset($form['actions'][$action]['#type']) && $form['actions'][$action]['#type'] === 'submit') {
-        $form['actions'][$action]['#submit'][] = '_iq_autocode_form_submit';
+        $form['actions'][$action]['#submit'][] = '_iq_autocode_form_submit_' . $type->getEntityTypeId();
       }
     }
   }
@@ -419,8 +464,16 @@ function _iq_autocode_get_utm_fields($target, ThirdPartySettingsInterface $type)
 /**
  * Submit function for account settings form.
  */
-function _iq_autocode_form_submit(array $form, FormStateInterface $form_state) {
+function _iq_autocode_form_submit_user(array $form, FormStateInterface $form_state) {
   $type = new UserThirdpartyWrapper();
+  _iq_autocode_form_type_form_builder(NULL, $type, $form, $form_state);
+}
+
+/**
+ * Submit function for redirect settings form.
+ */
+function _iq_autocode_form_submit_redirect(array $form, FormStateInterface $form_state) {
+  $type = new RedirectThirdpartyWrapper();
   _iq_autocode_form_type_form_builder(NULL, $type, $form, $form_state);
 }
 
@@ -481,6 +534,11 @@ function _iq_autocode_add_autocode_output(&$form, $entity, $settings) {
     if ($entity->getEntityTypeId() == 'user') {
       $prefix = 'uc';
     }
+
+    if ($entity->getEntityTypeId() == 'redirect') {
+      $prefix = 'rc';
+    }
+
     $form['meta']['iq_autocode_qr_container'] = [
       '#type' => 'fieldset',
       '#title' => t('QR Code'),
