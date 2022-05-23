@@ -16,6 +16,7 @@ use Drupal\node\Entity\Node;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Url;
+use Drupal\redirect\Entity\Redirect;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -195,7 +196,7 @@ class CodeController extends ControllerBase {
   public function downloadRedirectQr(string $short_value) {
     $id = intval($short_value, 36);
     if (is_numeric($id)) {
-      $entity = User::load($id);
+      $entity = Redirect::load($id);
       if (!empty($entity) && (new RedirectThirdpartyWrapper())->getThirdPartySetting('iq_autocode', 'qr_enable', FALSE)) {
         return $this->sendQrCode($entity);
       }
@@ -372,10 +373,12 @@ class CodeController extends ControllerBase {
     $url = Url::fromRoute('<front>', [], ['absolute' => TRUE])->toString();
     $id = intval($short_value, 36);
     if (is_numeric($id)) {
-      $entity = User::load($id);
+      $entity = Redirect::load($id);
       if (!empty($entity)) {
-        $settings = (new UserThirdpartyWrapper())->getThirdPartySettings('iq_autocode');
-        $url = $this->createURL($entity, $settings, $type);
+        $settings = (new RedirectThirdpartyWrapper())->getThirdPartySettings('iq_autocode');
+        if (!empty($settings[$type . '_enable'])) {
+          $url = $entity->getRedirectUrl()->toString();
+        }
       }
     }
     return new RedirectResponse($url);
