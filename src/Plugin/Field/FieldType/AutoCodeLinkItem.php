@@ -70,6 +70,10 @@ class AutoCodeLinkItem extends LinkItem {
           $host = (new UserThirdpartyWrapper())->getThirdPartySetting('iq_autocode', 'qr_base_domain', \Drupal::request()->getSchemeAndHttpHost());
           $prefix = 'uc';
         }
+        if ($entity->getEntityTypeId() == 'redirect') {
+          $host = (new UserThirdpartyWrapper())->getThirdPartySetting('iq_autocode', 'qr_base_domain', \Drupal::request()->getSchemeAndHttpHost());
+          $prefix = 'rc';
+        }
 
         $value = [
           'uri' => $host . '/' . $prefix . '/' . base_convert($entity->id(), 10, 36),

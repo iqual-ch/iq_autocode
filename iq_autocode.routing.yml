@@ -9,14 +9,21 @@ iq_autocode.user_url_qr:
   path: "/uc/{short_value}"
   defaults:
     _controller: '\Drupal\iq_autocode\Controller\CodeController::resolveUserUrlQr'
-    _title: "Node URL"
+    _title: "User URL"
   requirements:
     _permission: "access content"
 iq_autocode.term_url_qr:
   path: "/tc/{short_value}"
   defaults:
     _controller: '\Drupal\iq_autocode\Controller\CodeController::resolveTermUrlQr'
-    _title: "Node URL"
+    _title: "Term URL"
+  requirements:
+    _permission: "access content"
+iq_autocode.redirect_url_qr:
+  path: "/rc/{short_value}"
+  defaults:
+    _controller: '\Drupal\iq_autocode\Controller\CodeController::resolveRedirectUrlQr'
+    _title: "Redirect URL"
   requirements:
     _permission: "access content"
 iq_autocode.download_node_qr:
@@ -30,17 +37,23 @@ iq_autocode.download_user_qr:
   path: "/iq_autocode/uc/{short_value}"
   defaults:
     _controller: '\Drupal\iq_autocode\Controller\CodeController::downloadUserQr'
-    _title: "Node Code Download"
+    _title: "User Code Download"
   requirements:
     _permission: "access content"
 iq_autocode.download_term_qr:
   path: "/iq_autocode/tc/{short_value}"
   defaults:
     _controller: '\Drupal\iq_autocode\Controller\CodeController::downloadTermQr'
-    _title: "Node Code Download"
+    _title: "Term Code Download"
   requirements:
     _permission: "access content"
-
+iq_autocode.download_redirect_qr:
+  path: "/iq_autocode/rc/{short_value}"
+  defaults:
+    _controller: '\Drupal\iq_autocode\Controller\CodeController::downloadRedirectQr'
+    _title: "Redirect Code Download"
+  requirements:
+    _permission: "access content"
 iq_autocode.node_url_short:
   path: "/ns/{short_value}"
   defaults:
@@ -52,13 +65,20 @@ iq_autocode.user_url_short:
   path: "/us/{short_value}"
   defaults:
     _controller: '\Drupal\iq_autocode\Controller\CodeController::resolveUserUrlShort'
-    _title: "Node URL"
+    _title: "User URL"
   requirements:
     _permission: "access content"
 iq_autocode.term_url_short:
   path: "/ts/{short_value}"
   defaults:
     _controller: '\Drupal\iq_autocode\Controller\CodeController::resolveTermUrlShort'
-    _title: "Node URL"
+    _title: "Term URL"
+  requirements:
+    _permission: "access content"
+iq_autocode.redirect_url_short:
+  path: "/rs/{short_value}"
+  defaults:
+    _controller: '\Drupal\iq_autocode\Controller\CodeController::resolveRedirectUrlShort'
+    _title: "Redirect URL"
   requirements:
     _permission: "access content"

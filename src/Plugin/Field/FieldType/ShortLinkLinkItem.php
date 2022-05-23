@@ -2,6 +2,7 @@
 
 namespace Drupal\iq_autocode\Plugin\Field\FieldType;
 
+use Drupal\iq_autocode\RedirectThirdpartyWrapper;
 use Drupal\iq_autocode\UserThirdpartyWrapper;
 use Drupal\taxonomy\Entity\Vocabulary;
 use Drupal\link\Plugin\Field\FieldType\LinkItem;
@@ -69,6 +70,10 @@ class ShortLinkLinkItem extends LinkItem {
         if ($entity->getEntityTypeId() == 'user') {
           $host = (new UserThirdpartyWrapper())->getThirdPartySetting('iq_autocode', 'qr_base_domain', \Drupal::request()->getSchemeAndHttpHost());
           $prefix = 'us';
+        }
+        if ($entity->getEntityTypeId() == 'redirect') {
+          $host = (new RedirectThirdpartyWrapper())->getThirdPartySetting('iq_autocode', 'qr_base_domain', \Drupal::request()->getSchemeAndHttpHost());
+          $prefix = 'rs';
         }
 
         $value = [
