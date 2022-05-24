@@ -169,7 +169,7 @@ function iq_autocode_field_widget_info_alter(array &$info) {
 /**
  * Implements hook_views_data().
  */
-function pagedesigner_block_adaptable_views_data() {
+function iq_autocode_views_data() {
   $data = [];
   $definition = [
     'iq_autocode' => [
