@@ -378,7 +378,7 @@ class CodeController extends ControllerBase {
         $settings = (new RedirectThirdpartyWrapper())->getThirdPartySettings('iq_autocode');
         if (!empty($settings[$type . '_enable'])) {
           $url = $entity->getRedirectUrl();
-          $query = $url->getOption('query');
+          $query = \Drupal::request()->query->all();
           foreach (self::UTM_VARS as $utmvar) {
             $settingName = $type . '_' . $utmvar;
             $value = $this->tokenService->replace($settings[$settingName], [$entity->getEntityTypeId() => $entity], ['clear' => TRUE]);
@@ -408,11 +408,11 @@ class CodeController extends ControllerBase {
    */
   protected function createUrl(EntityInterface $entity, array $settings, string $type): string {
     if (!empty($settings[$type . '_enable'])) {
-      $query = [];
+      $query = \Drupal::request()->query->all();
       foreach (self::UTM_VARS as $utmvar) {
         $settingName = $type . '_' . $utmvar;
         $value = $this->tokenService->replace($settings[$settingName], [$entity->getEntityTypeId() => $entity], ['clear' => TRUE]);
-        if (!empty($value)) {
+        if (empty($query[$utmvar]) && !empty($value)) {
           $query[$utmvar] = $value;
         }
       }
