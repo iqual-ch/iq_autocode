@@ -364,9 +364,7 @@ function _iq_autocode_build_form(ThirdPartySettingsInterface $type, array &$form
     ],
   ];
 
-  if ($type->getEntityTypeId() != 'redirect') {
-    $form['iq_autocode']['qr_code'] += _iq_autocode_get_utm_fields('qr', $type);
-  }
+  $form['iq_autocode']['qr_code'] += _iq_autocode_get_utm_fields('qr', $type);
 
   $form['iq_autocode']['short_link'] = [
     '#type' => 'details',
@@ -403,9 +401,7 @@ function _iq_autocode_build_form(ThirdPartySettingsInterface $type, array &$form
     ],
   ];
 
-  if ($type->getEntityTypeId() != 'redirect') {
-    $form['iq_autocode']['short_link'] += _iq_autocode_get_utm_fields('short', $type);
-  }
+  $form['iq_autocode']['short_link'] += _iq_autocode_get_utm_fields('short', $type);
 
   if (
     method_exists($type, 'getEntityTypeId') &&
