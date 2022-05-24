@@ -381,7 +381,7 @@ class CodeController extends ControllerBase {
           $query = $url->getOption('query');
           foreach (self::UTM_VARS as $utmvar) {
             $settingName = $type . '_' . $utmvar;
-            $value = $value = $this->tokenService->replace($settings[$settingName], [$entity->getEntityTypeId() => $entity], ['clear' => TRUE]);
+            $value = $this->tokenService->replace($settings[$settingName], [$entity->getEntityTypeId() => $entity], ['clear' => TRUE]);
             if (empty($query[$utmvar]) && !empty($value)) {
               $query[$utmvar] = $value;
             }
@@ -411,7 +411,7 @@ class CodeController extends ControllerBase {
       $query = [];
       foreach (self::UTM_VARS as $utmvar) {
         $settingName = $type . '_' . $utmvar;
-        $value = $value = $this->tokenService->replace($settings[$settingName], [$entity->getEntityTypeId() => $entity], ['clear' => TRUE]);
+        $value = $this->tokenService->replace($settings[$settingName], [$entity->getEntityTypeId() => $entity], ['clear' => TRUE]);
         if (!empty($value)) {
           $query[$utmvar] = $value;
         }
