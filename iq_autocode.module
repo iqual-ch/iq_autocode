@@ -174,18 +174,16 @@ function iq_autocode_views_data() {
   $definition = [
     'iq_autocode' => [
       'title' => t('Qr code'),
-      'help' => t('Qr code to the node.'),
+      'help' => t('Qr code to the entity.'),
       'field' => [
         'id' => 'iq_autocode',
       ],
     ],
-    [
-      'iq_autocode_short_link' => [
-        'title' => t('Short link'),
-        'help' => t('Short link to the node.'),
-        'field' => [
-          'id' => 'iq_autocode_short_link',
-        ],
+    'iq_autocode_short_link' => [
+      'title' => t('Short link'),
+      'help' => t('Short link to the entity.'),
+      'field' => [
+        'id' => 'iq_autocode_short_link',
       ],
     ],
   ];
@@ -193,7 +191,11 @@ function iq_autocode_views_data() {
   foreach ($entityTypes as $typeId) {
     $type = \Drupal::entityTypeManager()->getDefinition($typeId, FALSE);
     if (!empty($type)) {
-      $data[$type->getDataTable()] = $definition;
+      if (!empty($type->getDataTable())) {
+        $data[$type->getDataTable()] = $definition;
+      } else {
+        $data[$type->getBaseTable()] = $definition;
+      }
     }
   }
   return $data;
