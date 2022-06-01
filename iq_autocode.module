@@ -167,25 +167,38 @@ function iq_autocode_field_widget_info_alter(array &$info) {
 }
 
 /**
- * Implements hook_views_data_alter().
+ * Implements hook_views_data().
  */
-function iq_autocode_views_data_alter(array &$data) {
-  if (isset($data['node_field_data'])) {
-    $data['node_field_data']['iq_autocode'] = [
+function iq_autocode_views_data() {
+  $data = [];
+  $definition = [
+    'iq_autocode' => [
       'title' => t('Qr code'),
-      'help' => t('Qr code to the node.'),
+      'help' => t('Qr code to the entity.'),
       'field' => [
         'id' => 'iq_autocode',
       ],
-    ];
-    $data['node_field_data']['iq_autocode_short_link'] = [
+    ],
+    'iq_autocode_short_link' => [
       'title' => t('Short link'),
-      'help' => t('Short link to the node.'),
+      'help' => t('Short link to the entity.'),
       'field' => [
         'id' => 'iq_autocode_short_link',
       ],
-    ];
+    ],
+  ];
+  $entityTypes = ['node', 'user', 'term', 'redirect'];
+  foreach ($entityTypes as $typeId) {
+    $type = \Drupal::entityTypeManager()->getDefinition($typeId, FALSE);
+    if (!empty($type)) {
+      if (!empty($type->getDataTable())) {
+        $data[$type->getDataTable()] = $definition;
+      } else {
+        $data[$type->getBaseTable()] = $definition;
+      }
+    }
   }
+  return $data;
 }
 
 /**
@@ -215,9 +228,13 @@ function iq_autocode_token_info() {
       'node' => $autocodeTokens,
       'term' => $autocodeTokens,
       'user' => $autocodeTokens,
-      'redirect' => $autocodeTokens,
     ],
   ];
+
+  $type = \Drupal::entityTypeManager()->getDefinition('redirect', FALSE);
+  if (!empty($type)) {
+    $info['tokens']['redirect'] = $autocodeTokens;
+  }
 
   return $info;
 }
@@ -364,9 +381,7 @@ function _iq_autocode_build_form(ThirdPartySettingsInterface $type, array &$form
     ],
   ];
 
-  if ($type->getEntityTypeId() != 'redirect') {
-    $form['iq_autocode']['qr_code'] += _iq_autocode_get_utm_fields('qr', $type);
-  }
+  $form['iq_autocode']['qr_code'] += _iq_autocode_get_utm_fields('qr', $type);
 
   $form['iq_autocode']['short_link'] = [
     '#type' => 'details',
@@ -403,9 +418,7 @@ function _iq_autocode_build_form(ThirdPartySettingsInterface $type, array &$form
     ],
   ];
 
-  if ($type->getEntityTypeId() != 'redirect') {
-    $form['iq_autocode']['short_link'] += _iq_autocode_get_utm_fields('short', $type);
-  }
+  $form['iq_autocode']['short_link'] += _iq_autocode_get_utm_fields('short', $type);
 
   if (
     method_exists($type, 'getEntityTypeId') &&

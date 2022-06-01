@@ -370,18 +370,27 @@ class CodeController extends ControllerBase {
    *   The redirect response to the user.
    */
   protected function resolveRedirectUrl(string $short_value, string $type) {
-    $url = Url::fromRoute('<front>', [], ['absolute' => TRUE])->toString();
+    $url = Url::fromRoute('<front>', [], ['absolute' => TRUE]);
     $id = intval($short_value, 36);
     if (is_numeric($id)) {
       $entity = Redirect::load($id);
       if (!empty($entity)) {
         $settings = (new RedirectThirdpartyWrapper())->getThirdPartySettings('iq_autocode');
         if (!empty($settings[$type . '_enable'])) {
-          $url = $entity->getRedirectUrl()->toString();
+          $url = $entity->getRedirectUrl();
+          $query = \Drupal::request()->query->all();
+          foreach (self::UTM_VARS as $utmvar) {
+            $settingName = $type . '_' . $utmvar;
+            $value = $this->tokenService->replace($settings[$settingName], [$entity->getEntityTypeId() => $entity], ['clear' => TRUE]);
+            if (empty($query[$utmvar]) && !empty($value)) {
+              $query[$utmvar] = $value;
+            }
+          }
+          $url->setOption('query', $query);
         }
       }
     }
-    return new RedirectResponse($url);
+    return new RedirectResponse($url->toString());
   }
 
   /**
@@ -399,11 +408,11 @@ class CodeController extends ControllerBase {
    */
   protected function createUrl(EntityInterface $entity, array $settings, string $type): string {
     if (!empty($settings[$type . '_enable'])) {
-      $query = [];
+      $query = \Drupal::request()->query->all();
       foreach (self::UTM_VARS as $utmvar) {
         $settingName = $type . '_' . $utmvar;
-        $value = $value = $this->tokenService->replace($settings[$settingName], [$entity->getEntityTypeId() => $entity], ['clear' => TRUE]);
-        if (!empty($value)) {
+        $value = $this->tokenService->replace($settings[$settingName], [$entity->getEntityTypeId() => $entity], ['clear' => TRUE]);
+        if (empty($query[$utmvar]) && !empty($value)) {
           $query[$utmvar] = $value;
         }
       }
