@@ -18,25 +18,7 @@ class AutoCodeField extends FieldPluginBase {
    * {@inheritdoc}
    */
   public function render(ResultRow $values) {
-    $relationship_entities = $values->_relationship_entities;
-    $value = NULL;
-
-    // First check the referenced entity.
-    if (isset($relationship_entities['node'])) {
-      $entity = $relationship_entities['node'];
-    }
-    elseif (isset($relationship_entities['taxonomy_term'])) {
-      $entity = $relationship_entities['taxonomy_term'];
-    }
-    elseif (isset($relationship_entities['user'])) {
-      $entity = $relationship_entities['user'];
-    }
-    elseif (isset($relationship_entities['redirect'])) {
-      $entity = $relationship_entities['redirect'];
-    }
-    else {
-      $entity = $values->_entity;
-    }
+    $entity = $this->getEntity($values);
 
     // If we have the right entity type, render the code field.
     if (!empty($entity) && in_array($entity->getEntityTypeId(), ['node', 'taxonomy_term', 'user', 'redirect'])) {

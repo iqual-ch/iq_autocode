@@ -20,7 +20,8 @@ class AutoCodeShortLinkField extends Url {
    * {@inheritdoc}
    */
   public function getValue(ResultRow $values, $field = NULL) {
-    return $values->_entity->iq_autocode_short_link->uri;
+    $entity = $this->getEntity($values);
+    return $entity->iq_autocode_short_link->uri;
   }
 
   /**
