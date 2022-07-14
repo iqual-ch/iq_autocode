@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\iq_autocode;
+namespace Drupal\autoshortqr;
 
 /**
  * Emulates ThirdpartySettingsInterface for the redirect type.

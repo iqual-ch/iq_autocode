@@ -1,18 +1,18 @@
 <?php
 
-namespace Drupal\iq_autocode\Plugin\Field\FieldFormatter;
+namespace Drupal\autoshortqr\Plugin\Field\FieldFormatter;
 
 use Drupal\barcodes\Plugin\Field\FieldFormatter\Barcode;
 use Drupal\Core\Form\FormStateInterface;
 
 /**
- * Plugin implementation of the 'iq_autocode' formatter.
+ * Plugin implementation of the 'autoshortqr' formatter.
  *
  * @FieldFormatter(
- *   id = "iq_autocode",
+ *   id = "autoshortqr",
  *   label = @Translation("Autocode formatter"),
  *   field_types = {
- *     "iq_autocode",
+ *     "autoshortqr",
  *   }
  * )
  */

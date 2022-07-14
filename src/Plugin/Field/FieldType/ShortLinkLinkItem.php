@@ -1,9 +1,9 @@
 <?php
 
-namespace Drupal\iq_autocode\Plugin\Field\FieldType;
+namespace Drupal\autoshortqr\Plugin\Field\FieldType;
 
-use Drupal\iq_autocode\RedirectThirdpartyWrapper;
-use Drupal\iq_autocode\UserThirdpartyWrapper;
+use Drupal\autoshortqr\RedirectThirdpartyWrapper;
+use Drupal\autoshortqr\UserThirdpartyWrapper;
 use Drupal\taxonomy\Entity\Vocabulary;
 use Drupal\link\Plugin\Field\FieldType\LinkItem;
 
@@ -11,11 +11,11 @@ use Drupal\link\Plugin\Field\FieldType\LinkItem;
  * Variant of the 'link' field that links to the current company.
  *
  * @FieldType(
- *   id = "iq_autocode_shortlink",
+ *   id = "autoshortqr_shortlink",
  *   label = @Translation("Autocode"),
  *   description = @Translation("A link to the current company that is associated with the entity."),
- *   default_widget = "iq_autocode",
- *   default_formatter = "iq_autocode",
+ *   default_widget = "autoshortqr",
+ *   default_formatter = "autoshortqr",
  *   constraints = {"LinkType" = {}, "LinkAccess" = {}, "LinkExternalProtocols" = {}, "LinkNotExistingInternal" = {}}
  * )
  */
@@ -60,19 +60,19 @@ class ShortLinkLinkItem extends LinkItem {
       $entity = $this->getEntity();
       if (!$entity->isNew()) {
         if ($entity->getEntityTypeId() == 'node') {
-          $host = $entity->type->entity->getThirdPartySetting('iq_autocode', 'qr_base_domain', \Drupal::request()->getSchemeAndHttpHost());
+          $host = $entity->type->entity->getThirdPartySetting('autoshortqr', 'qr_base_domain', \Drupal::request()->getSchemeAndHttpHost());
           $prefix = 'ns';
         }
         if ($entity->getEntityTypeId() == 'taxonomy_term') {
-          $host = Vocabulary::load($entity->bundle())->getThirdPartySetting('iq_autocode', 'qr_base_domain', \Drupal::request()->getSchemeAndHttpHost());
+          $host = Vocabulary::load($entity->bundle())->getThirdPartySetting('autoshortqr', 'qr_base_domain', \Drupal::request()->getSchemeAndHttpHost());
           $prefix = 'ts';
         }
         if ($entity->getEntityTypeId() == 'user') {
-          $host = (new UserThirdpartyWrapper())->getThirdPartySetting('iq_autocode', 'qr_base_domain', \Drupal::request()->getSchemeAndHttpHost());
+          $host = (new UserThirdpartyWrapper())->getThirdPartySetting('autoshortqr', 'qr_base_domain', \Drupal::request()->getSchemeAndHttpHost());
           $prefix = 'us';
         }
         if ($entity->getEntityTypeId() == 'redirect') {
-          $host = (new RedirectThirdpartyWrapper())->getThirdPartySetting('iq_autocode', 'qr_base_domain', \Drupal::request()->getSchemeAndHttpHost());
+          $host = (new RedirectThirdpartyWrapper())->getThirdPartySetting('autoshortqr', 'qr_base_domain', \Drupal::request()->getSchemeAndHttpHost());
           $prefix = 'rs';
         }
 

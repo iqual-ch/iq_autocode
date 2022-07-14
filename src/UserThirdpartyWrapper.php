@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\iq_autocode;
+namespace Drupal\autoshortqr;
 
 use Drupal\Core\Config\Entity\ThirdPartySettingsInterface;
 
@@ -47,7 +47,7 @@ class UserThirdpartyWrapper implements ThirdPartySettingsInterface {
    * Create a new UserThirdpartyWrapper.
    */
   public function __construct() {
-    $this->config = \Drupal::service('config.factory')->getEditable('iq_autocode.settings');
+    $this->config = \Drupal::service('config.factory')->getEditable('autoshortqr.settings');
   }
 
   /**

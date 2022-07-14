@@ -1,14 +1,14 @@
 <?php
 
-namespace Drupal\iq_autocode\Controller;
+namespace Drupal\autoshortqr\Controller;
 
 use Drupal\Core\Language\LanguageInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\Language\LanguageManager;
 use Drupal\Core\Utility\Token;
 use Drupal\Core\Entity\EntityInterface;
-use Drupal\iq_autocode\UserThirdpartyWrapper;
-use Drupal\iq_autocode\RedirectThirdpartyWrapper;
+use Drupal\autoshortqr\UserThirdpartyWrapper;
+use Drupal\autoshortqr\RedirectThirdpartyWrapper;
 use Drupal\taxonomy\Entity\Vocabulary;
 use Drupal\taxonomy\Entity\Term;
 use Drupal\user\Entity\User;
@@ -136,7 +136,7 @@ class CodeController extends ControllerBase {
       $entity = Node::load($id);
       /** @var \Drupal\node\Entity\NodeType $entityType */
       $entityType = $entity->type->entity;
-      if (!empty($entity) && $entityType->getThirdPartySetting('iq_autocode', 'qr_enable', FALSE)) {
+      if (!empty($entity) && $entityType->getThirdPartySetting('autoshortqr', 'qr_enable', FALSE)) {
         return $this->sendQrCode($entity);
       }
     }
@@ -156,7 +156,7 @@ class CodeController extends ControllerBase {
     $id = intval($short_value, 36);
     if (is_numeric($id)) {
       $entity = User::load($id);
-      if (!empty($entity) && (new UserThirdpartyWrapper())->getThirdPartySetting('iq_autocode', 'qr_enable', FALSE)) {
+      if (!empty($entity) && (new UserThirdpartyWrapper())->getThirdPartySetting('autoshortqr', 'qr_enable', FALSE)) {
         return $this->sendQrCode($entity);
       }
     }
@@ -177,7 +177,7 @@ class CodeController extends ControllerBase {
     if (is_numeric($id)) {
       $entity = Term::load($id);
 
-      if (!empty($entity) && Vocabulary::load($entity->bundle())->getThirdPartySetting('iq_autocode', 'qr_enable', FALSE)) {
+      if (!empty($entity) && Vocabulary::load($entity->bundle())->getThirdPartySetting('autoshortqr', 'qr_enable', FALSE)) {
         return $this->sendQrCode($entity);
       }
     }
@@ -197,7 +197,7 @@ class CodeController extends ControllerBase {
     $id = intval($short_value, 36);
     if (is_numeric($id)) {
       $entity = Redirect::load($id);
-      if (!empty($entity) && (new RedirectThirdpartyWrapper())->getThirdPartySetting('iq_autocode', 'qr_enable', FALSE)) {
+      if (!empty($entity) && (new RedirectThirdpartyWrapper())->getThirdPartySetting('autoshortqr', 'qr_enable', FALSE)) {
         return $this->sendQrCode($entity);
       }
     }
@@ -266,8 +266,8 @@ class CodeController extends ControllerBase {
    *   The response.
    */
   protected function sendQrCode(ContentEntityInterface $entity) {
-    $svgCode = $entity->get('iq_autocode')->view([
-      'type' => 'iq_autocode',
+    $svgCode = $entity->get('autoshortqr')->view([
+      'type' => 'autoshortqr',
       'label' => t('QR Code'),
       'settings' => [
         'height' => 400,
@@ -303,7 +303,7 @@ class CodeController extends ControllerBase {
       if (!empty($entity)) {
         /** @var \Drupal\node\Entity\NodeType $nodeType */
         $nodeType = $entity->type->entity;
-        $settings = $nodeType->getThirdPartySettings('iq_autocode');
+        $settings = $nodeType->getThirdPartySettings('autoshortqr');
         $url = $this->createURL($entity, $settings, $type);
       }
     }
@@ -327,7 +327,7 @@ class CodeController extends ControllerBase {
     if (is_numeric($id)) {
       $entity = User::load($id);
       if (!empty($entity)) {
-        $settings = (new UserThirdpartyWrapper())->getThirdPartySettings('iq_autocode');
+        $settings = (new UserThirdpartyWrapper())->getThirdPartySettings('autoshortqr');
         $url = $this->createURL($entity, $settings, $type);
       }
     }
@@ -351,7 +351,7 @@ class CodeController extends ControllerBase {
     if (is_numeric($id)) {
       $entity = Term::load($id);
       if (!empty($entity)) {
-        $settings = Vocabulary::load($entity->bundle())->getThirdPartySettings('iq_autocode');
+        $settings = Vocabulary::load($entity->bundle())->getThirdPartySettings('autoshortqr');
         $url = $this->createURL($entity, $settings, $type);
       }
     }
@@ -375,7 +375,7 @@ class CodeController extends ControllerBase {
     if (is_numeric($id)) {
       $entity = Redirect::load($id);
       if (!empty($entity)) {
-        $settings = (new RedirectThirdpartyWrapper())->getThirdPartySettings('iq_autocode');
+        $settings = (new RedirectThirdpartyWrapper())->getThirdPartySettings('autoshortqr');
         if (!empty($settings[$type . '_enable'])) {
           $url = $entity->getRedirectUrl();
           $query = \Drupal::request()->query->all();

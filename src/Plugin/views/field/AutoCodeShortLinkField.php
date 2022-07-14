@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\iq_autocode\Plugin\views\field;
+namespace Drupal\autoshortqr\Plugin\views\field;
 
 use Drupal\views\Plugin\views\field\Url;
 use Drupal\views\ResultRow;
@@ -12,7 +12,7 @@ use Drupal\Core\Url as CoreUrl;
  *
  * @ingroup views_field_handlers
  *
- * @ViewsField("iq_autocode_short_link")
+ * @ViewsField("autoshortqr_short_link")
  */
 class AutoCodeShortLinkField extends Url {
 
@@ -21,7 +21,7 @@ class AutoCodeShortLinkField extends Url {
    */
   public function getValue(ResultRow $values, $field = NULL) {
     $entity = $this->getEntity($values);
-    return $entity->iq_autocode_short_link->uri;
+    return $entity->autoshortqr_short_link->uri;
   }
 
   /**

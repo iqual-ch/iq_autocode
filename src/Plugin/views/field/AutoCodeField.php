@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\iq_autocode\Plugin\views\field;
+namespace Drupal\autoshortqr\Plugin\views\field;
 
 use Drupal\views\ResultRow;
 use Drupal\views\Plugin\views\field\FieldPluginBase;
@@ -10,7 +10,7 @@ use Drupal\views\Plugin\views\field\FieldPluginBase;
  *
  * @ingroup views_field_handlers
  *
- * @ViewsField("iq_autocode")
+ * @ViewsField("autoshortqr")
  */
 class AutoCodeField extends FieldPluginBase {
 
@@ -22,8 +22,8 @@ class AutoCodeField extends FieldPluginBase {
 
     // If we have the right entity type, render the code field.
     if (!empty($entity) && in_array($entity->getEntityTypeId(), ['node', 'taxonomy_term', 'user', 'redirect'])) {
-      $value = $entity->iq_autocode->view([
-        'type' => 'iq_autocode',
+      $value = $entity->autoshortqr->view([
+        'type' => 'autoshortqr',
         'label' => '',
         'settings' => [
           'height' => 400,
@@ -41,7 +41,7 @@ class AutoCodeField extends FieldPluginBase {
       if ($entity->getEntityTypeId() == 'redirect') {
         $prefix = 'rc';
       }
-      $value['#prefix'] = '<a href="/iq_autocode/' . $prefix . '/' . base_convert($entity->id(), 10, 36) . '" target="_blank">';
+      $value['#prefix'] = '<a href="/autoshortqr/' . $prefix . '/' . base_convert($entity->id(), 10, 36) . '" target="_blank">';
       $value['#suffix'] = '</a>';
     }
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\iq_autocode;
+namespace Drupal\autoshortqr;
 
 use Drupal\Core\Field\FieldItemList;
 use Drupal\Core\TypedData\ComputedItemListTrait;
