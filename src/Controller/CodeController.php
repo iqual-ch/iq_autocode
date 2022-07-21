@@ -17,6 +17,7 @@ use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Url;
 use Drupal\redirect\Entity\Redirect;
+use Drupal\Core\Routing\TrustedRedirectResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -291,8 +292,8 @@ class CodeController extends ControllerBase {
    * @param string $type
    *   The type of link to resolve (qr or short).
    *
-   * @return \Symfony\Component\HttpFoundation\RedirectResponse
-   *   The redirect response to the node.
+   * @return \Drupal\Core\Routing\TrustedRedirectResponse
+   *   The trusted redirect response to the node.
    */
   protected function resolveNodeUrl(string $short_value, string $type) {
     $url = Url::fromRoute('<front>', [], ['absolute' => TRUE])->toString();
@@ -307,7 +308,7 @@ class CodeController extends ControllerBase {
         $url = $this->createURL($entity, $settings, $type);
       }
     }
-    return new RedirectResponse($url);
+    return new TrustedRedirectResponse($url);
   }
 
   /**
@@ -318,8 +319,8 @@ class CodeController extends ControllerBase {
    * @param string $type
    *   The type of link to resolve (qr or short).
    *
-   * @return \Symfony\Component\HttpFoundation\RedirectResponse
-   *   The redirect response to the user.
+   * @return \Drupal\Core\Routing\TrustedRedirectResponse
+   *   The trusted redirect response to the user.
    */
   protected function resolveUserUrl(string $short_value, string $type) {
     $url = Url::fromRoute('<front>', [], ['absolute' => TRUE])->toString();
@@ -331,7 +332,7 @@ class CodeController extends ControllerBase {
         $url = $this->createURL($entity, $settings, $type);
       }
     }
-    return new RedirectResponse($url);
+    return new TrustedRedirectResponse($url);
   }
 
   /**
@@ -342,8 +343,8 @@ class CodeController extends ControllerBase {
    * @param string $type
    *   The type of link to resolve (qr or short).
    *
-   * @return \Symfony\Component\HttpFoundation\RedirectResponse
-   *   The redirect response to the term.
+   * @return \Drupal\Core\Routing\TrustedRedirectResponse
+   *   The trusted redirect response to the term.
    */
   protected function resolveTermUrl(string $short_value, string $type) {
     $url = Url::fromRoute('<front>', [], ['absolute' => TRUE])->toString();
@@ -355,7 +356,7 @@ class CodeController extends ControllerBase {
         $url = $this->createURL($entity, $settings, $type);
       }
     }
-    return new RedirectResponse($url);
+    return new TrustedRedirectResponse($url);
   }
 
   /**
@@ -366,8 +367,8 @@ class CodeController extends ControllerBase {
    * @param string $type
    *   The type of link to resolve (qr or short).
    *
-   * @return \Symfony\Component\HttpFoundation\RedirectResponse
-   *   The redirect response to the user.
+   * @return \Drupal\Core\Routing\TrustedRedirectResponse
+   *   The trusted redirect response to the user.
    */
   protected function resolveRedirectUrl(string $short_value, string $type) {
     $url = Url::fromRoute('<front>', [], ['absolute' => TRUE]);
@@ -390,7 +391,7 @@ class CodeController extends ControllerBase {
         }
       }
     }
-    return new RedirectResponse($url->toString());
+    return new TrustedRedirectResponse($url->toString());
   }
 
   /**
