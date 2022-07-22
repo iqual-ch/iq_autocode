@@ -17,6 +17,7 @@ use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Url;
 use Drupal\redirect\Entity\Redirect;
+use Drupal\Core\Routing\TrustedRedirectResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -291,11 +292,11 @@ class CodeController extends ControllerBase {
    * @param string $type
    *   The type of link to resolve (qr or short).
    *
-   * @return \Symfony\Component\HttpFoundation\RedirectResponse
+   * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Drupal\Core\Routing\TrustedRedirectResponse
    *   The redirect response to the node.
    */
   protected function resolveNodeUrl(string $short_value, string $type) {
-    $url = Url::fromRoute('<front>', [], ['absolute' => TRUE])->toString();
+    $url = Url::fromRoute('<front>', [], ['absolute' => TRUE]);
     $id = intval($short_value, 36);
     if (is_numeric($id)) {
       $entity = Node::load($id);
@@ -307,7 +308,10 @@ class CodeController extends ControllerBase {
         $url = $this->createURL($entity, $settings, $type);
       }
     }
-    return new RedirectResponse($url);
+    if ($url->isExternal()) {
+      return new TrustedRedirectResponse($url->toString(TRUE)->getGeneratedUrl());
+    }
+    return new RedirectResponse($url->toString());
   }
 
   /**
@@ -318,11 +322,11 @@ class CodeController extends ControllerBase {
    * @param string $type
    *   The type of link to resolve (qr or short).
    *
-   * @return \Symfony\Component\HttpFoundation\RedirectResponse
+   * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Drupal\Core\Routing\TrustedRedirectResponse
    *   The redirect response to the user.
    */
   protected function resolveUserUrl(string $short_value, string $type) {
-    $url = Url::fromRoute('<front>', [], ['absolute' => TRUE])->toString();
+    $url = Url::fromRoute('<front>', [], ['absolute' => TRUE]);
     $id = intval($short_value, 36);
     if (is_numeric($id)) {
       $entity = User::load($id);
@@ -331,7 +335,10 @@ class CodeController extends ControllerBase {
         $url = $this->createURL($entity, $settings, $type);
       }
     }
-    return new RedirectResponse($url);
+    if ($url->isExternal()) {
+      return new TrustedRedirectResponse($url->toString(TRUE)->getGeneratedUrl());
+    }
+    return new RedirectResponse($url->toString());
   }
 
   /**
@@ -342,11 +349,11 @@ class CodeController extends ControllerBase {
    * @param string $type
    *   The type of link to resolve (qr or short).
    *
-   * @return \Symfony\Component\HttpFoundation\RedirectResponse
+   * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Drupal\Core\Routing\TrustedRedirectResponse
    *   The redirect response to the term.
    */
   protected function resolveTermUrl(string $short_value, string $type) {
-    $url = Url::fromRoute('<front>', [], ['absolute' => TRUE])->toString();
+    $url = Url::fromRoute('<front>', [], ['absolute' => TRUE]);
     $id = intval($short_value, 36);
     if (is_numeric($id)) {
       $entity = Term::load($id);
@@ -355,7 +362,10 @@ class CodeController extends ControllerBase {
         $url = $this->createURL($entity, $settings, $type);
       }
     }
-    return new RedirectResponse($url);
+    if ($url->isExternal()) {
+      return new TrustedRedirectResponse($url->toString(TRUE)->getGeneratedUrl());
+    }
+    return new RedirectResponse($url->toString());
   }
 
   /**
@@ -366,7 +376,7 @@ class CodeController extends ControllerBase {
    * @param string $type
    *   The type of link to resolve (qr or short).
    *
-   * @return \Symfony\Component\HttpFoundation\RedirectResponse
+   * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Drupal\Core\Routing\TrustedRedirectResponse
    *   The redirect response to the user.
    */
   protected function resolveRedirectUrl(string $short_value, string $type) {
@@ -390,6 +400,9 @@ class CodeController extends ControllerBase {
         }
       }
     }
+    if ($url->isExternal()) {
+      return new TrustedRedirectResponse($url->toString(TRUE)->getGeneratedUrl());
+    }
     return new RedirectResponse($url->toString());
   }
 
@@ -403,15 +416,18 @@ class CodeController extends ControllerBase {
    * @param string $type
    *   The tzpe of short url (qr or short).
    *
-   * @return string
-   *   The Url to the entity or the front page.
+   * @return \Drupal\Core\Url
+   *   The Url object to the entity or the front page.
    */
-  protected function createUrl(EntityInterface $entity, array $settings, string $type): string {
+  protected function createUrl(EntityInterface $entity, array $settings, string $type): \Drupal\Core\Url {
     if (!empty($settings[$type . '_enable'])) {
       $query = \Drupal::request()->query->all();
       foreach (self::UTM_VARS as $utmvar) {
         $settingName = $type . '_' . $utmvar;
-        $value = $this->tokenService->replace($settings[$settingName], [$entity->getEntityTypeId() => $entity], ['clear' => TRUE]);
+        // Add an empty BubbleableMetadata Object to prevent local data caching
+        // else TrustedRedirectResponse will fail
+        $bubbleable_metadata = new \Drupal\Core\Render\BubbleableMetadata();
+        $value = $this->tokenService->replace($settings[$settingName], [$entity->getEntityTypeId() => $entity], ['clear' => TRUE], $bubbleable_metadata);
         if (empty($query[$utmvar]) && !empty($value)) {
           $query[$utmvar] = $value;
         }
@@ -427,10 +443,9 @@ class CodeController extends ControllerBase {
         'query' => $query,
         'language' => $currentLanguage,
       ]
-        )
-        ->toString();
+      );
     }
-    return Url::fromRoute('<front>', [], ['absolute' => TRUE])->toString();
+    return Url::fromRoute('<front>', [], ['absolute' => TRUE]);
   }
 
 }
